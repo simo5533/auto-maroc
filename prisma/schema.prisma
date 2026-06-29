@@ -1,0 +1,266 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BUYER
+  OWNER
+  SELLER_PRIVATE
+  DEALER
+  GARAGE_PARTNER
+  EXPERT
+  ADMIN
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  HYBRID
+  ELECTRIC
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+}
+
+enum BodyType {
+  CITY_CAR
+  SEDAN
+  SUV
+  COMMERCIAL
+  PICKUP
+  FAMILY
+}
+
+enum ConditionType {
+  NEW
+  USED
+}
+
+enum UsageType {
+  CITY
+  FAMILY
+  TAXI
+  PROFESSIONAL
+  LONG_TRIP
+  STUDENT
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+}
+
+/// Provenance : avis réel utilisateur, import (fichier / Google), ou ancien texte démo catalogue (supprimable au réimport).
+enum ReviewOrigin {
+  USER
+  IMPORT
+  CATALOG_DEMO
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  passwordHash       String
+  name               String?
+  localePref         String              @default("ar")
+  role               Role                @default(BUYER)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  reviews            Review[]
+  favorites          Favorite[]
+  comparisons        Comparison[]
+  photoDiagnostics   PhotoDiagnostic[]
+  obdScans           ObdScan[]
+  chatSessions       ChatSession[]
+}
+
+model Car {
+  id                 String         @id @default(cuid())
+  brandAr            String
+  brandFr            String?
+  modelAr            String
+  modelFr            String?
+  versionAr          String
+  versionFr          String?
+  year               Int
+  priceNewEst        Int
+  priceUsedEst       Int?
+  conditionDefault   ConditionType  @default(NEW)
+  fuel               FuelType
+  transmission       Transmission
+  bodyType           BodyType
+  /// Tableau JSON d’étiquettes UsageType, ex. ["CITY","FAMILY"] (SQLite n’a pas de liste scalaire native).
+  usageRecommended   Json   @default("[]")
+  imageUrl           String?
+  /// Galerie : tableau JSON d’URLs (ex. picsum ou CDN). La première sert aussi de vignette si imageUrl est vide.
+  imageUrls          Json   @default("[]")
+  /// Logo marque (ex. Clearbit logo.clearbit.com).
+  brandLogoUrl       String?
+  /// Site constructeur indicatif (page .ma / global).
+  officialUrl        String?
+  /// Points forts / contexte marché (texte long, hors description courte).
+  highlightsAr       String?
+  highlightsFr       String?
+  /// Teinte carrosserie (affichage catalogue / fiche), FR — indicatif.
+  exteriorColorFr    String?
+  /// Teinte carrosserie (affichage catalogue / fiche), AR — indicatif.
+  exteriorColorAr    String?
+  descriptionAr      String
+  descriptionFr      String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  specs              CarSpecs?
+  reviews            Review[]
+  favorites          Favorite[]
+}
+
+model CarSpecs {
+  id                   String @id @default(cuid())
+  carId                String @unique
+  car                  Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
+  engineAr             String?
+  engineFr             String?
+  fiscalPower          Int?
+  realPowerKw          Float?
+  consumptionL100      Float?
+  dimensionsAr         String?
+  seats                Int?
+  trunkL               Int?
+  safetyAr             String?
+  comfortAr            String?
+  warrantyAr           String?
+  maintenanceCostEst Int?
+  partsAvailabilityAr  String?
+  reliabilityScore     Int?
+  resaleScore          Int?
+  comfortScore         Int?
+  globalScore          Int?
+  /// CO₂ / couple / garde-au-sol : champs optionnels pour enrichir la fiche.
+  co2Gkm               Int?
+  torqueNm             Int?
+  groundClearanceMm    Int?
+  /// Équipements & blocs « fiche commerciale » (connectivité, éclairage, VE, garantie, etc.) — JSON validé côté app.
+  ficheEquipement      Json?
+  /// Grande fiche « style constructeur » : design, techno, ADAS, FAQ, environnement — JSON (productStorySchema).
+  productStory         Json?
+  /// URL iframe viewer 3D extérieur (Sketchfab / constructeur / CDN).
+  viewer3dExteriorUrl  String?
+  /// URL iframe viewer 3D intérieur (panorama cockpit / visite 3D).
+  viewer3dInteriorUrl  String?
+}
+
+model Review {
+  id                String        @id @default(cuid())
+  carId             String
+  car               Car           @relation(fields: [carId], references: [id], onDelete: Cascade)
+  userId            String?
+  user              User?         @relation(fields: [userId], references: [id])
+  displayLabel      String
+  city              String
+  usageMonths       Int?
+  mileageKm         Int?
+  consumptionNote   Int?
+  comfortNote       Int?
+  reliabilityNote   Int?
+  maintenanceNote   Int?
+  resaleNote        Int?
+  globalNote        Int?
+  commentAr         String
+  commentFr         String?
+  /// Provenance affichée (ex. Google Maps, forum, import CSV).
+  sourceName        String?
+  /// Lien public vers l’avis ou la page source (si autorisé).
+  sourceUrl         String?
+  reviewOrigin      ReviewOrigin  @default(USER)
+  verified          Boolean       @default(false)
+  status            ReviewStatus  @default(PENDING)
+  createdAt         DateTime      @default(now())
+}
+
+model Favorite {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  carId  String
+  car    Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, carId])
+}
+
+model Comparison {
+  id             String   @id @default(cuid())
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id])
+  title          String?
+  carIds         Json
+  conclusionAr   String?
+  conclusionFr   String?
+  createdAt      DateTime @default(now())
+}
+
+model PhotoDiagnostic {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicleLabel       String?
+  scoreVisual        Int?
+  riskLevel          String?
+  defectsJson        Json?
+  recommendationAr   String?
+  pdfUrl             String?
+  createdAt          DateTime @default(now())
+}
+
+model ObdScan {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicleLabel String?
+  adapterLabel String?
+  protocol     String?
+  dtcJson      Json?
+  liveDataJson Json?
+  pdfUrl       String?
+  readOnly     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model ChatSession {
+  id        String        @id @default(cuid())
+  userId    String?
+  user      User?         @relation(fields: [userId], references: [id])
+  title     String?
+  createdAt DateTime      @default(now())
+  messages  ChatMessage[]
+}
+
+model ChatMessage {
+  id         String      @id @default(cuid())
+  sessionId  String
+  session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role       String
+  contentAr  String
+  contentFr  String?
+  createdAt  DateTime    @default(now())
+}
+
+model Partner {
+  id         String  @id @default(cuid())
+  type       String
+  nameAr     String
+  nameFr     String?
+  city       String
+  servicesAr String?
+  phone      String?
+  email      String?
+  active     Boolean @default(true)
+}

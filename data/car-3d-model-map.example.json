@@ -1,0 +1,15 @@
+{
+  "entries": [
+    {
+      "brandFr": "Dacia",
+      "modelFr": "Duster",
+      "viewer3dExteriorUrl": "https://sketchfab.com/models/6d64d85369944db3b7bd3804bd67d040/embed"
+    },
+    {
+      "brandFr": "Renault",
+      "modelFr": "Clio",
+      "viewer3dExteriorUrl": "https://sketchfab.com/models/6e8fb3f12cf34c1095cdd89cfd77580c/embed",
+      "viewer3dInteriorUrl": "https://sketchfab.com/models/c5f830a811af4917972de8fa47949de9/embed"
+    }
+  ]
+}

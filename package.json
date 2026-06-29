@@ -1,0 +1,55 @@
+{
+  "name": "auto-maroc",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "postinstall": "prisma generate",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:push": "prisma db push",
+    "db:deploy": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "catalog:generate": "tsx scripts/generate-catalog.ts",
+    "catalog:hydrate-3d": "tsx scripts/hydrate-catalog-3d-from-map.ts",
+    "catalog:backfill-images": "tsx scripts/backfill-vehicle-images.ts",
+    "reviews:import-docx": "tsx scripts/import-reviews-docx.ts",
+    "reviews:google": "tsx scripts/fetch-google-place-reviews.ts",
+    "reviews:backfill-origin": "tsx scripts/backfill-review-origin.ts",
+    "cars:import-3d": "tsx scripts/import-car-3d-links.ts",
+    "cars:generate-3d-links": "tsx scripts/generate-car-3d-links.ts",
+    "cars:sync-3d": "npm run cars:generate-3d-links && npm run cars:import-3d",
+    "cars:clear-3d-links": "tsx scripts/clear-car-3d-links.ts",
+    "cars:expand-years": "tsx scripts/expand-years.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.3",
+    "next": "16.2.4",
+    "next-intl": "^4.11.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.4.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
+    "prisma": "6.8.2",
+    "tailwindcss": "^4",
+    "tsx": "^4.19.4",
+    "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

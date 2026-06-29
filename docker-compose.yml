@@ -1,0 +1,18 @@
+# Optionnel : PostgreSQL local si vous repassez prisma/schema.prisma en provider "postgresql".
+# Par défaut le projet utilise SQLite (file:./dev.db) sans service externe.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: automaroc
+      POSTGRES_PASSWORD: automaroc
+      POSTGRES_DB: automaroc
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

@@ -1,0 +1,30 @@
+{
+  "entries": [
+    {
+      "match": {
+        "brandAr": "داسيا",
+        "modelAr": "دوستر",
+        "year": 2025,
+        "versionAr": "1.5 Blue dCi 115"
+      },
+      "reviews": [
+        {
+          "displayLabel": "مالك — الدار البيضاء — رأي مستورد",
+          "city": "الدار البيضاء",
+          "usageMonths": 18,
+          "mileageKm": 42000,
+          "globalNote": 4,
+          "consumptionNote": 4,
+          "comfortNote": 4,
+          "reliabilityNote": 4,
+          "maintenanceNote": 4,
+          "resaleNote": 4,
+          "commentAr": "ضع هنا النص الحقيقي من منتدى أو موقع تملك حق نشره.",
+          "commentFr": "Collez ici un avis réel dont vous détenez les droits ou une autorisation de citation.",
+          "sourceName": "Forum / source autorisée",
+          "sourceUrl": "https://example.com/page-source"
+        }
+      ]
+    }
+  ]
+}
