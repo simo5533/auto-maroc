@@ -309,9 +309,9 @@
   },
   "errors": {
     "dbTitle": "قاعدة البيانات غير مهيأة",
-    "dbBody": "المتغير DATABASE_URL غير موجود (إلزامي في الإنتاج).\n\nمحلياً: انسخ .env.example إلى .env — افتراضياً SQLite (ملف prisma/dev.db) بدون Docker.\nثم: npm run db:push && npm run db:seed",
-    "dbUnreachableTitle": "قاعدة البيانات غير متاحة",
-    "dbUnreachableBody": "المشروع يستخدم SQLite محلياً: DATABASE_URL=file:./dev.db (ملف prisma/dev.db).\n\n• من جذر المشروع: npm run db:push ثم npm run db:seed\n• إذا لم يُنشأ الملف: صلاحيات الكتابة على مجلد prisma/، أو أغلق next dev إن كان الملف مقفولاً.\n• إذا بقي .env يحتوي postgresql://localhost… بينما المخطط sqlite، استبدل بـ file:./dev.db كما في .env.example.\n\nللعودة إلى PostgreSQL: provider postgresql في prisma/schema.prisma وعنوان صالح في .env وخادم يعمل (مثلاً npm run db:up مع Docker)."
+    "dbBody": "المتغير DATABASE_URL غير موجود على Vercel.\n\n1. أنشئ قاعدة PostgreSQL (Neon : neon.tech)\n2. Vercel → Environment Variables → DATABASE_URL (رابط pooled مع -pooler)\n3. أضف AUTH_SECRET (32 حرفاً على الأقل)\n4. أعد النشر",
+    "dbUnreachableTitle": "قاعدة البيانات غير متاحة أو فارغة",
+    "dbUnreachableBody": "PostgreSQL مضبوط لكن الاتصال فشل أو الجداول غير موجودة.\n\nمن جهازك (مع رابط Neon في DATABASE_URL):\n• npm run db:setup\n\nثم أعد تحميل الموقع.\n\nتأكد أن DATABASE_URL على Vercel يستخدم رابط pooled من Neon (?sslmode=require)."
   },
   "adminImport": {
     "title": "استيراد الكتالوج (المغرب)",

@@ -5,7 +5,19 @@ import bcrypt from "bcryptjs";
 import { catalogBundleSchema } from "../src/lib/catalog-vehicle-zod";
 import { upsertCatalogVehicle } from "../src/lib/upsert-catalog-vehicle";
 
-const prisma = new PrismaClient();
+/** Neon pooler : une seule connexion pour éviter P2024 pendant l’import massif. */
+function seedDatabaseUrl(): string {
+  const url = process.env.DATABASE_URL?.trim();
+  if (!url) throw new Error("DATABASE_URL manquant pour le seed.");
+  if (url.includes("pooler") && !/connection_limit=/i.test(url)) {
+    return `${url}${url.includes("?") ? "&" : "?"}connection_limit=1`;
+  }
+  return url;
+}
+
+const prisma = new PrismaClient({
+  datasources: { db: { url: seedDatabaseUrl() } },
+});
 
 async function main() {
   const adminHash = await bcrypt.hash("Admin123!", 10);

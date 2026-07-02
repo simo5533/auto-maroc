@@ -12,6 +12,7 @@
     "db:down": "docker compose down",
     "db:push": "prisma db push",
     "db:deploy": "prisma db push",
+    "db:setup": "prisma db push && tsx prisma/seed.ts",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "catalog:generate": "tsx scripts/generate-catalog.ts",

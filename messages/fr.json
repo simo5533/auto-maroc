@@ -309,9 +309,9 @@
   },
   "errors": {
     "dbTitle": "Base de données non configurée",
-    "dbBody": "La variable DATABASE_URL est absente (obligatoire en production).\n\nEn local, copiez .env.example vers .env : par défaut SQLite (fichier prisma/dev.db), sans Docker.\nPuis : npm run db:push && npm run db:seed",
-    "dbUnreachableTitle": "Base de données inaccessible",
-    "dbUnreachableBody": "Ce projet est configuré en SQLite local : DATABASE_URL=file:./dev.db (fichier prisma/dev.db).\n\n• À la racine du projet : npm run db:push puis npm run db:seed\n• Si le fichier ne se crée pas : droits d’écriture sur le dossier prisma/, ou fermez next dev / l’IDE si le fichier est verrouillé (Windows).\n• Si votre .env contient encore postgresql://localhost… alors que le schéma Prisma est « sqlite », remplacez par file:./dev.db comme dans .env.example.\n\nPour du PostgreSQL à la place : remettre provider postgresql dans prisma/schema.prisma, une URL valide dans .env, puis serveur démarré (ex. npm run db:up avec Docker)."
+    "dbBody": "La variable DATABASE_URL est absente sur Vercel.\n\n1. Créez une base PostgreSQL (Neon : neon.tech)\n2. Vercel → Settings → Environment Variables → DATABASE_URL (URL « pooled » avec -pooler)\n3. Ajoutez aussi AUTH_SECRET (32 caractères min.)\n4. Redéployez le site",
+    "dbUnreachableTitle": "Base de données inaccessible ou vide",
+    "dbUnreachableBody": "PostgreSQL est configuré mais la connexion échoue ou les tables sont absentes.\n\nSur votre PC (avec l’URL Neon dans DATABASE_URL) :\n• npm run db:setup\n\nPuis redéployez ou rechargez le site.\n\nVérifiez aussi sur Vercel que DATABASE_URL utilise l’URL « pooled » Neon (?sslmode=require)."
   },
   "adminImport": {
     "title": "Importer le catalogue (Maroc)",

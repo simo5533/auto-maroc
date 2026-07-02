@@ -68,9 +68,10 @@ SQLite ne fonctionne pas sur Vercel (fichiers éphémères). Le projet utilise *
 Depuis votre machine, avec `DATABASE_URL` pointant vers Neon :
 
 ```bash
-npm run db:deploy
-npm run db:seed
+npm run db:setup
 ```
+
+(`db:push` + import du catalogue `morocco-catalog.json` + comptes admin)
 
 Puis en admin sur le site : **Importer le lot** (`/fr/admin`).
 
