@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { btnPrimary, inputBase, selectBase } from "@/components/ui/styles";
+import { carBrandLabel, carModelLabel } from "@/lib/locale-text";
 
 export function ReviewForm({ locale }: { locale: "ar" | "fr" }) {
   const t = useTranslations("reviews");
@@ -25,7 +26,7 @@ export function ReviewForm({ locale }: { locale: "ar" | "fr" }) {
         setCars(
           (d.cars as { id: string; brandAr: string; modelAr: string; brandFr?: string | null; modelFr?: string | null }[]).map((c) => ({
             id: c.id,
-            label: locale === "ar" ? `${c.brandAr} ${c.modelAr}` : `${c.brandFr ?? c.brandAr} ${c.modelFr ?? c.modelAr}`,
+            label: `${carBrandLabel(c, locale)} ${carModelLabel(c, locale)}`,
           })),
         );
       } catch {

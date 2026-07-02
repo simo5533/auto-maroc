@@ -26,6 +26,14 @@ import { isOpenAiConfigured } from "@/lib/openai-env";
 import { Car3DViewer } from "@/components/Car3DViewer";
 import { buildCarCriteriaRatings, type CarCriterionId } from "@/lib/car-criteria-ratings";
 import { CarCriteriaStars } from "@/components/CarCriteriaStars";
+import {
+  carBrandLabel,
+  carModelLabel,
+  carVersionLabel,
+  pickLocaleText,
+  reviewComment,
+  reviewDisplayLabel,
+} from "@/lib/locale-text";
 
 function reviewOriginLabel(
   origin: ReviewOrigin,
@@ -97,16 +105,15 @@ export default async function CarDetailPage({
 
   const title =
     locale === "ar"
-      ? `${car.brandAr} ${car.modelAr} — ${car.versionAr}`
-      : `${car.brandFr ?? car.brandAr} ${car.modelFr ?? car.modelAr}`;
+      ? `${carBrandLabel(car, locale)} ${carModelLabel(car, locale)} — ${carVersionLabel(car, locale)}`
+      : `${carBrandLabel(car, locale)} ${carModelLabel(car, locale)}`;
 
   const images = await ensureRealVehicleImages(prisma, car);
   const logoUrl = resolveBrandLogoUrl(car.brandFr, car.brandLogoUrl);
   const fiche = car.specs ? parseFicheEquipement(car.specs.ficheEquipement) : null;
   const officialModelPageUrl = officialModelShowroomUrl(car.brandFr, car.modelFr);
   const exterior = resolveExteriorColors(car);
-  const descriptionBase =
-    locale === "ar" ? car.descriptionAr : car.descriptionFr ?? car.descriptionAr;
+  const descriptionBase = pickLocaleText(locale, car.descriptionAr, car.descriptionFr);
   const descriptionWithColor = `${descriptionBase}\n\n${t("exteriorColorInDescription", {
     color: locale === "ar" ? exterior.ar : exterior.fr,
   })}`;
@@ -261,14 +268,14 @@ export default async function CarDetailPage({
         </Card>
       ) : null}
 
-      {(car.highlightsAr || car.highlightsFr) && (
+      {pickLocaleText(locale, car.highlightsAr, car.highlightsFr) ? (
         <Card padding="p-5 sm:p-6">
           <h2 className="text-lg font-bold text-zinc-900">{t("highlights")}</h2>
           <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-zinc-800">
-            {locale === "ar" ? car.highlightsAr ?? "" : car.highlightsFr ?? car.highlightsAr ?? ""}
+            {pickLocaleText(locale, car.highlightsAr, car.highlightsFr)}
           </p>
         </Card>
-      )}
+      ) : null}
 
       <Card padding="p-6 sm:p-8 md:p-10">
         <CarProductStory story={productStory} locale={locale} />
@@ -437,7 +444,9 @@ export default async function CarDetailPage({
                           </span>
                         )}
                       </div>
-                      <p className="mt-2 text-xs font-semibold text-zinc-800">{r.displayLabel}</p>
+                      <p className="mt-2 text-xs font-semibold text-zinc-800">
+                        {reviewDisplayLabel(r, locale)}
+                      </p>
                       {(r.sourceName || r.sourceUrl) && (
                         <p className="mt-1 text-xs text-zinc-500">
                           {t("reviewSource")}{" "}
@@ -458,7 +467,7 @@ export default async function CarDetailPage({
                         </p>
                       )}
                       <p className="mt-2 text-sm leading-relaxed text-zinc-900">
-                        {locale === "ar" ? r.commentAr : r.commentFr ?? r.commentAr}
+                        {reviewComment(r, locale)}
                       </p>
                     </li>
                   );

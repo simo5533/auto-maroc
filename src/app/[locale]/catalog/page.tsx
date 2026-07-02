@@ -15,6 +15,7 @@ import { getStoredCarImageUrls } from "@/lib/car-images";
 import { isPexelsNonDemoUrl, isPicsumPlaceholderUrl } from "@/lib/car-demo-images";
 import { resolveBrandLogoUrl } from "@/lib/brand-assets";
 import { officialModelShowroomUrl } from "@/lib/brand-model-official-links";
+import { carBrandLabel, carModelLabel, carVersionLabel } from "@/lib/locale-text";
 import type { Car, CarSpecs } from "@prisma/client";
 
 const KEYS = ["q", "minPrice", "maxPrice", "fuel", "transmission", "body", "condition", "usage", "brand"] as const;
@@ -70,7 +71,7 @@ async function refreshCatalogImages(cars: CarRow[]): Promise<void> {
 function groupByBrand(cars: CarRow[], locale: string): [string, CarRow[]][] {
   const map = new Map<string, CarRow[]>();
   for (const c of cars) {
-    const label = locale === "ar" ? c.brandAr : (c.brandFr ?? c.brandAr);
+    const label = carBrandLabel(c, locale);
     const list = map.get(label) ?? [];
     list.push(c);
     map.set(label, list);
@@ -144,15 +145,12 @@ export default async function CatalogPage({
               const official = head?.officialUrl;
               const items = list.map((c) => {
                 const imgs = getDisplayCarImageUrls(c);
-                const title =
-                  locale === "ar"
-                    ? `${c.modelAr}`.trim()
-                    : `${c.modelFr ?? c.modelAr}`.trim();
+                const title = carModelLabel(c, locale).trim();
                 return {
                   id: c.id,
                   coverUrl: imgs[0] ?? null,
                   title,
-                  versionLabel: `${c.year} · ${locale === "ar" ? c.versionAr : c.versionFr ?? c.versionAr}`,
+                  versionLabel: `${c.year} · ${carVersionLabel(c, locale)}`,
                   bodyType: c.bodyType,
                   fuel: c.fuel,
                   transmission: c.transmission,

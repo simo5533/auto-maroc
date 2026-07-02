@@ -68,11 +68,12 @@ export function Shell({
   children: React.ReactNode;
 }) {
   const t = useTranslations("nav");
+  const ts = useTranslations("shell");
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const other = locale === "ar" ? "fr" : "ar";
-  const switchLabel = locale === "ar" ? t("langFr") : "العربية";
+  const switchLabel = t("langFr");
 
   const nav: NavItem[] = [
     { href: "/", label: t("home") },
@@ -99,7 +100,7 @@ export function Shell({
     <div className="flex min-h-screen flex-col">
       <div className="border-b border-emerald-950/20 bg-emerald-950 text-[11px] text-emerald-200/90">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-1.5 sm:px-6">
-          <span className="tracking-wide">MAD · Maroc · Pré-diagnostic & aide à l’achat</span>
+          <span className="tracking-wide">{ts("topbar")}</span>
           <button
             type="button"
             onClick={() => router.replace(pathname, { locale: other })}
@@ -116,7 +117,7 @@ export function Shell({
             <LogoMark />
             <div className="min-w-0 leading-tight">
               <span className="block truncate text-base font-bold tracking-tight text-white sm:text-lg">Auto Maroc</span>
-              <span className="hidden text-[11px] font-medium text-emerald-300/90 sm:block">Smart car buyer</span>
+              <span className="hidden text-[11px] font-medium text-emerald-300/90 sm:block">{ts("tagline")}</span>
             </div>
           </Link>
 

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { HomeBrandStripItem } from "@/lib/home-popular-brands";
 import { getCarCoverImageUrl } from "@/lib/car-images";
+import { carBrandLabel, carModelLabel } from "@/lib/locale-text";
 import { cardBase } from "@/components/ui/styles";
 
 type ApiModel = {
@@ -174,12 +175,9 @@ export function HomeBrandSpotlight({
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {models.map((m, i) => {
               const img = firstImage(m);
-              const modelLabel =
-                locale === "ar"
-                  ? `${m.modelAr}`.trim()
-                  : `${m.modelFr ?? m.modelAr}`.trim();
-              const brandKey = m.brandFr ?? m.brandAr;
-              const modelKey = m.modelFr ?? m.modelAr;
+              const modelLabel = carModelLabel(m, locale).trim();
+              const brandKey = m.brandFr?.trim() || m.brandAr;
+              const modelKey = m.modelFr?.trim() || m.modelAr;
               return (
                 <li
                   key={`${brandKey}-${modelKey}`}

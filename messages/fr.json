@@ -20,6 +20,10 @@
     "menu": "Menu",
     "close": "Fermer"
   },
+  "shell": {
+    "topbar": "MAD · Maroc · Pré-diagnostic & aide à l’achat",
+    "tagline": "Aide intelligente à l’achat auto"
+  },
   "legal": {
     "short": "Cette application aide à la décision : elle ne remplace pas la visite technique ni l’expertise mécanique."
   },

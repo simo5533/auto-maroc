@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { btnPrimary, selectBase } from "@/components/ui/styles";
 import { getCarCoverImageUrl } from "@/lib/car-images";
+import { carBrandLabel, carModelLabel, carVersionLabel } from "@/lib/locale-text";
 import type { BodyType, FuelType, Transmission } from "@prisma/client";
 
 export type FichesCar = {
@@ -32,23 +33,23 @@ function firstImage(c: FichesCar): string | null {
 }
 
 function brandKey(c: FichesCar): string {
-  return c.brandFr ?? c.brandAr;
+  return (c.brandFr?.trim() || c.brandAr).trim();
 }
 
 function modelKey(c: FichesCar): string {
-  return c.modelFr ?? c.modelAr;
+  return (c.modelFr?.trim() || c.modelAr).trim();
 }
 
 function brandLabel(c: FichesCar, locale: "ar" | "fr"): string {
-  return locale === "ar" ? c.brandAr : c.brandFr ?? c.brandAr;
+  return carBrandLabel(c, locale);
 }
 
 function modelLabel(c: FichesCar, locale: "ar" | "fr"): string {
-  return locale === "ar" ? c.modelAr : c.modelFr ?? c.modelAr;
+  return carModelLabel(c, locale);
 }
 
 function versionLabel(c: FichesCar, locale: "ar" | "fr"): string {
-  return locale === "ar" ? c.versionAr : c.versionFr ?? c.versionAr;
+  return carVersionLabel(c, locale);
 }
 
 export function FichesTechniquesClient({

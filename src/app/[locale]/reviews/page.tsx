@@ -5,6 +5,7 @@ import { DatabaseRequiredMessage } from "@/components/DatabaseRequiredMessage";
 import { ReviewForm } from "@/components/ReviewForm";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/Card";
+import { carBrandLabel, carModelLabel, reviewComment, reviewDisplayLabel } from "@/lib/locale-text";
 
 export default async function ReviewsPage({ params }: { params: Promise<{ locale: string }> }) {
   if (!isDatabaseConfigured()) {
@@ -29,13 +30,11 @@ export default async function ReviewsPage({ params }: { params: Promise<{ locale
           <li key={r.id}>
             <Card hover padding="p-5 sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                {locale === "ar"
-                  ? `${r.car.brandAr} ${r.car.modelAr}`
-                  : `${r.car.brandFr ?? r.car.brandAr} ${r.car.modelFr ?? r.car.modelAr}`}
+                {carBrandLabel(r.car, locale)} {carModelLabel(r.car, locale)}
               </p>
-              <p className="mt-1 text-xs text-zinc-500">{r.displayLabel}</p>
+              <p className="mt-1 text-xs text-zinc-500">{reviewDisplayLabel(r, locale)}</p>
               <p className="mt-3 text-sm leading-relaxed text-zinc-800">
-                {locale === "ar" ? r.commentAr : r.commentFr ?? r.commentAr}
+                {reviewComment(r, locale)}
               </p>
             </Card>
           </li>

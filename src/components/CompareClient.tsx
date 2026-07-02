@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { btnPrimary, btnSecondary, inputBase, selectBase } from "@/components/ui/styles";
 import { getCarCoverImageUrl } from "@/lib/car-images";
+import { carBrandLabel, carModelLabel, carVersionLabel, pickLocaleText } from "@/lib/locale-text";
 
 type CarOpt = { id: string; label: string };
 
@@ -46,10 +47,7 @@ function firstImage(c: CompareCar): string | null {
 }
 
 function carLabel(c: CompareCar, locale: "ar" | "fr"): string {
-  const brand = locale === "ar" ? c.brandAr : c.brandFr ?? c.brandAr;
-  const model = locale === "ar" ? c.modelAr : c.modelFr ?? c.modelAr;
-  const version = locale === "ar" ? c.versionAr : c.versionFr ?? c.versionAr;
-  return `${brand} ${model} — ${version}`;
+  return `${carBrandLabel(c, locale)} ${carModelLabel(c, locale)} — ${carVersionLabel(c, locale)}`;
 }
 
 export function CompareClient({
@@ -87,10 +85,7 @@ export function CompareClient({
           }[]
         ).map((c) => ({
           id: c.id,
-          label:
-            locale === "ar"
-              ? `${c.brandAr} ${c.modelAr}`
-              : `${c.brandFr ?? c.brandAr} ${c.modelFr ?? c.modelAr}`,
+          label: `${carBrandLabel(c, locale)} ${carModelLabel(c, locale)}`,
         }));
         setCars(list);
       } catch {
@@ -204,7 +199,7 @@ function CompareResult({ data, locale }: { data: CompareResponse; locale: "ar" |
   if (!carA || !carB) return null;
 
   const winnerId = data.conclusion.winnerId;
-  const conclusionText = locale === "ar" ? data.conclusion.textAr : data.conclusion.textFr;
+  const conclusionText = pickLocaleText(locale, data.conclusion.textAr, data.conclusion.textFr);
 
   return (
     <section className="space-y-6">
@@ -272,7 +267,7 @@ function CompareCarCard({
           />
         ) : (
           <div className="flex h-full items-center justify-center text-3xl font-bold text-zinc-300">
-            {(locale === "ar" ? car.brandAr : car.brandFr ?? car.brandAr).slice(0, 2)}
+            {carBrandLabel(car, locale).slice(0, 2)}
           </div>
         )}
       </div>
