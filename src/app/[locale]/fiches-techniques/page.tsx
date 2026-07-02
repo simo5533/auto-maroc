@@ -6,6 +6,7 @@ import { DatabaseUnreachableMessage } from "@/components/DatabaseUnreachableMess
 import { isPrismaDbUnreachableError } from "@/lib/is-prisma-connection-error";
 import { PageHeader } from "@/components/PageHeader";
 import { FichesTechniquesClient, type FichesCar } from "@/components/FichesTechniquesClient";
+import { getDisplayCarImageUrls } from "@/lib/car-images";
 
 export default async function FichesTechniquesPage({
   params,
@@ -24,7 +25,7 @@ export default async function FichesTechniquesPage({
 
   let cars: FichesCar[];
   try {
-    cars = await prisma.car.findMany({
+    const rows = await prisma.car.findMany({
       select: {
         id: true,
         brandFr: true,
@@ -42,6 +43,10 @@ export default async function FichesTechniquesPage({
         imageUrls: true,
       },
       orderBy: [{ brandAr: "asc" }, { modelAr: "asc" }, { year: "desc" }],
+    });
+    cars = rows.map((c) => {
+      const imgs = getDisplayCarImageUrls(c);
+      return { ...c, imageUrl: imgs[0] ?? null, imageUrls: imgs };
     });
   } catch (e) {
     if (isPrismaDbUnreachableError(e)) {

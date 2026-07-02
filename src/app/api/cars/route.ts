@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { carWhereFromSearchParams } from "@/lib/car-filters";
+import { getDisplayCarImageUrls } from "@/lib/car-images";
 
 type CarRow = Awaited<ReturnType<typeof prisma.car.findMany>>[number];
 
@@ -59,17 +60,20 @@ export async function GET(req: Request) {
       take: 300,
     });
     const grouped = groupByModel(cars).slice(0, take);
-    const models = grouped.map((g) => ({
-      id: g.cover.id,
-      brandFr: g.brandFr,
-      brandAr: g.brandAr,
-      modelFr: g.modelFr,
-      modelAr: g.modelAr,
-      year: g.latestYear,
-      imageUrl: g.cover.imageUrl,
-      imageUrls: g.cover.imageUrls,
-      versionsCount: g.versionsCount,
-    }));
+    const models = grouped.map((g) => {
+      const imgs = getDisplayCarImageUrls(g.cover);
+      return {
+        id: g.cover.id,
+        brandFr: g.brandFr,
+        brandAr: g.brandAr,
+        modelFr: g.modelFr,
+        modelAr: g.modelAr,
+        year: g.latestYear,
+        imageUrl: imgs[0] ?? null,
+        imageUrls: imgs,
+        versionsCount: g.versionsCount,
+      };
+    });
     return NextResponse.json({ models });
   }
 

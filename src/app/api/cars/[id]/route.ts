@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { ReviewOrigin } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -9,10 +8,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     include: {
       specs: true,
       reviews: {
-        where: {
-          status: "APPROVED",
-          NOT: { reviewOrigin: ReviewOrigin.CATALOG_DEMO },
-        },
+        where: { status: "APPROVED" },
         orderBy: { createdAt: "desc" },
       },
     },

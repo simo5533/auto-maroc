@@ -27,6 +27,22 @@ import { Car3DViewer } from "@/components/Car3DViewer";
 import { buildCarCriteriaRatings, type CarCriterionId } from "@/lib/car-criteria-ratings";
 import { CarCriteriaStars } from "@/components/CarCriteriaStars";
 
+function reviewOriginLabel(
+  origin: ReviewOrigin,
+  t: (key: string) => string,
+): string | null {
+  switch (origin) {
+    case ReviewOrigin.CATALOG_DEMO:
+      return t("reviewOriginCatalog");
+    case ReviewOrigin.IMPORT:
+      return t("reviewOriginImport");
+    case ReviewOrigin.USER:
+      return t("reviewOriginUser");
+    default:
+      return null;
+  }
+}
+
 function reviewToneKind(globalNote: number | null): "positive" | "critical" | "mixed" {
   if (globalNote == null) return "mixed";
   if (globalNote >= 4) return "positive";
@@ -72,7 +88,6 @@ export default async function CarDetailPage({
     where: {
       carId: { in: siblingCarIds.map((r) => r.id) },
       status: "APPROVED",
-      NOT: { reviewOrigin: ReviewOrigin.CATALOG_DEMO },
     },
     orderBy: { createdAt: "desc" },
     take: 200,
@@ -406,12 +421,16 @@ export default async function CarDetailPage({
                         : "border-amber-200 bg-amber-50/70";
                   const toneLabel =
                     tone === "positive" ? t("reviewTonePositive") : tone === "critical" ? t("reviewToneCritical") : t("reviewToneMixed");
+                  const originLabel = reviewOriginLabel(r.reviewOrigin, t);
                   return (
                     <li key={r.id} className={`rounded-2xl border p-4 ${toneClass}`}>
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge tone={tone === "positive" ? "success" : tone === "critical" ? "warning" : "neutral"}>
                           {toneLabel}
                         </Badge>
+                        {originLabel ? (
+                          <Badge tone="neutral">{originLabel}</Badge>
+                        ) : null}
                         {r.globalNote != null && (
                           <span className="text-xs font-semibold text-zinc-700">
                             {t("globalNote")} : {r.globalNote}/5

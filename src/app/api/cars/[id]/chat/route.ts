@@ -6,7 +6,6 @@ import { buildProductStoryPayload } from "@/lib/car-product-story-build";
 import { answerCarQuestionOffline } from "@/lib/car-ai-offline";
 import { buildCarAiSystemPrompt, buildCarKnowledgeContext } from "@/lib/car-ai-context";
 import { getOpenAiApiKey } from "@/lib/openai-env";
-import { ReviewOrigin } from "@prisma/client";
 
 const bodySchema = z.object({
   locale: z.enum(["ar", "fr"]),
@@ -53,7 +52,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     where: {
       carId: { in: siblingIds.map((r) => r.id) },
       status: "APPROVED",
-      NOT: { reviewOrigin: ReviewOrigin.CATALOG_DEMO },
     },
     orderBy: { createdAt: "desc" },
     take: 16,

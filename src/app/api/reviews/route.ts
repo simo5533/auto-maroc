@@ -11,7 +11,6 @@ export async function GET(req: Request) {
     where: {
       carId,
       status: ReviewStatus.APPROVED,
-      NOT: { reviewOrigin: ReviewOrigin.CATALOG_DEMO },
     },
     orderBy: { createdAt: "desc" },
   });

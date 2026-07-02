@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { buildComparisonConclusion } from "@/lib/compare";
 import { derivePros, deriveCons, type CarLike } from "@/lib/car-pros-cons";
+import { getDisplayCarImageUrls } from "@/lib/car-images";
 import { getSession } from "@/lib/auth";
 
 const bodySchema = z.object({
@@ -61,8 +62,11 @@ export async function POST(req: Request) {
       consumptionL100: c.specs?.consumptionL100 ?? null,
       maintenanceCostEst: c.specs?.maintenanceCostEst ?? null,
     };
+    const imgs = getDisplayCarImageUrls(c);
     return {
       ...c,
+      imageUrl: imgs[0] ?? null,
+      imageUrls: imgs,
       pros: derivePros(carLike, loc, 5),
       cons: deriveCons(carLike, loc, 5),
     };

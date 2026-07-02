@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { HomeBrandStripItem } from "@/lib/home-popular-brands";
+import { getCarCoverImageUrl } from "@/lib/car-images";
 import { cardBase } from "@/components/ui/styles";
 
 type ApiModel = {
@@ -20,11 +21,7 @@ type ApiModel = {
 };
 
 function firstImage(c: ApiModel): string | null {
-  if (c.imageUrl && c.imageUrl.trim()) return c.imageUrl;
-  if (Array.isArray(c.imageUrls) && typeof c.imageUrls[0] === "string") {
-    return c.imageUrls[0] as string;
-  }
-  return null;
+  return getCarCoverImageUrl(c);
 }
 
 /** URL du hub modèle « choisir l'année » inspiré de Caradisiac. */

@@ -7,6 +7,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { btnPrimary, selectBase } from "@/components/ui/styles";
+import { getCarCoverImageUrl } from "@/lib/car-images";
 import type { BodyType, FuelType, Transmission } from "@prisma/client";
 
 export type FichesCar = {
@@ -27,11 +28,7 @@ export type FichesCar = {
 };
 
 function firstImage(c: FichesCar): string | null {
-  if (c.imageUrl && c.imageUrl.trim()) return c.imageUrl;
-  if (Array.isArray(c.imageUrls) && typeof c.imageUrls[0] === "string") {
-    return c.imageUrls[0] as string;
-  }
-  return null;
+  return getCarCoverImageUrl(c);
 }
 
 function brandKey(c: FichesCar): string {
