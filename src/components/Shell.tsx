@@ -73,7 +73,7 @@ export function Shell({
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const other = locale === "ar" ? "fr" : "ar";
-  const switchLabel = t("langFr");
+  const switchLabel = t("switchLang");
 
   const nav: NavItem[] = [
     { href: "/", label: t("home") },

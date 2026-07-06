@@ -16,7 +16,7 @@
     "admin": "Admin",
     "signIn": "Connexion",
     "signOut": "Déconnexion",
-    "langFr": "العربية",
+    "switchLang": "الدارجة",
     "menu": "Menu",
     "close": "Fermer"
   },
@@ -258,7 +258,7 @@
     "city": "Ville",
     "months": "Durée de possession (mois)",
     "kms": "Kilométrage",
-    "comment": "Commentaire (arabe requis)",
+    "comment": "Commentaire (darija requis)",
     "submit": "Envoyer"
   },
   "assistant": {

@@ -121,7 +121,7 @@ export function buildCarKnowledgeContext(
 export function buildCarAiSystemPrompt(locale: "ar" | "fr", context: string): string {
   const lang =
     locale === "ar"
-      ? "Reply only in Modern Standard Arabic. Be clear and concise."
+      ? "Reply only in Moroccan Darija (الدارجة المغربية), using natural spoken Moroccan Arabic — not Modern Standard Arabic. Be clear and concise."
       : "Réponds uniquement en français. Sois clair et concis.";
 
   return `You are the Auto-Maroc in-page assistant for exactly ONE vehicle listing. ${lang}

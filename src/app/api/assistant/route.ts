@@ -71,7 +71,7 @@ function offlineReply(locale: "ar" | "fr", question: string): string {
 function buildSystemPrompt(locale: "ar" | "fr", context: string): string {
   const lang =
     locale === "ar"
-      ? "Reply only in Modern Standard Arabic."
+      ? "Reply only in Moroccan Darija (الدارجة المغربية), using natural spoken Moroccan Arabic — not Modern Standard Arabic."
       : "Réponds uniquement en français.";
   return `You are the main Auto-Maroc assistant. ${lang}
 You MUST answer only automotive questions (cars, models, prices, reliability, maintenance, comparison, buying advice).
