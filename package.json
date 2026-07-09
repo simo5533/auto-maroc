@@ -20,6 +20,7 @@
     "catalog:backfill-images": "tsx scripts/backfill-vehicle-images.ts",
     "reviews:import-docx": "tsx scripts/import-reviews-docx.ts",
     "reviews:generate-darija": "tsx scripts/generate-reviews-darija.ts",
+    "reviews:import-xlsx": "tsx scripts/import-reviews-xlsx.ts",
     "reviews:google": "tsx scripts/fetch-google-place-reviews.ts",
     "reviews:backfill-origin": "tsx scripts/backfill-review-origin.ts",
     "cars:import-3d": "tsx scripts/import-car-3d-links.ts",
@@ -49,7 +50,8 @@
     "prisma": "6.8.2",
     "tailwindcss": "^4",
     "tsx": "^4.19.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "xlsx": "^0.18.5"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

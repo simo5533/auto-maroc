@@ -34,6 +34,7 @@ export const carSpecsInputSchema = z
 
 export const catalogReviewSchema = z.object({
   displayLabel: z.string().min(1),
+  displayLabelFr: z.string().optional().nullable(),
   city: z.string().min(1),
   commentAr: z.string().min(1),
   commentFr: z.string().optional().nullable(),

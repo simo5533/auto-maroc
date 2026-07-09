@@ -17,6 +17,7 @@ async function syncTemplateReviews(
       carId,
       userId: null,
       displayLabel: r.displayLabel,
+      displayLabelFr: r.displayLabelFr ?? null,
       city: r.city,
       usageMonths: r.usageMonths ?? null,
       mileageKm: r.mileageKm ?? null,

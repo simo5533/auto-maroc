@@ -46,6 +46,7 @@ export function reviewComment(
 export function reviewDisplayLabel(
   review: {
     displayLabel: string;
+    displayLabelFr?: string | null;
     city: string;
     usageMonths?: number | null;
     mileageKm?: number | null;
@@ -54,6 +55,9 @@ export function reviewDisplayLabel(
 ): string {
   if (toAppLocale(locale) === "ar") {
     return review.displayLabel?.trim() || review.city;
+  }
+  if (review.displayLabelFr?.trim()) {
+    return review.displayLabelFr.trim();
   }
   const bits: string[] = [];
   bits.push(review.usageMonths != null ? `Propriétaire — env. ${review.usageMonths} mois` : "Propriétaire");

@@ -37,6 +37,7 @@ export function AdminReviewsClient({ initial }: { initial: Row[] }) {
           </p>
           <p className="text-xs text-zinc-500">{r.displayLabel}</p>
           <p className="mt-2 text-zinc-800">{r.commentAr}</p>
+          {r.commentFr ? <p className="mt-2 text-zinc-600">{r.commentFr}</p> : null}
           <div className="mt-3 flex gap-2">
             <button type="button" className="rounded bg-emerald-700 px-3 py-1 text-white" onClick={() => setStatus(r.id, "APPROVED")}>
               Approuver

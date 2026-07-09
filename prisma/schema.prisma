@@ -165,6 +165,7 @@ model Review {
   userId            String?
   user              User?         @relation(fields: [userId], references: [id])
   displayLabel      String
+  displayLabelFr    String?
   city              String
   usageMonths       Int?
   mileageKm         Int?
