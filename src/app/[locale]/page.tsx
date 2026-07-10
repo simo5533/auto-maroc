@@ -31,7 +31,7 @@ export default async function HomePage({
     /* build ou démarrage sans DB */
   }
 
-  const modules = ["modCatalog", "modReviews", "modCompare", "modPhoto", "modObd2", "modAi"] as const;
+  const modules = ["modCatalog", "modReviews", "modCompare", "modAi"] as const;
 
   return (
     <div className="space-y-14 sm:space-y-16">      <section className="relative overflow-hidden rounded-3xl border border-emerald-900/20 bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 p-8 text-white shadow-2xl sm:p-12 lg:p-14">
@@ -71,7 +71,7 @@ export default async function HomePage({
           <p className="mt-1 text-sm font-medium text-zinc-600">{t("statReviews")}</p>
         </Card>
         <Card className="text-center sm:text-start" padding="p-6">
-          <p className="text-3xl font-bold tabular-nums text-emerald-700">6</p>
+          <p className="text-3xl font-bold tabular-nums text-emerald-700">4</p>
           <p className="mt-1 text-sm font-medium text-zinc-600">{t("statModules")}</p>
         </Card>
       </section>

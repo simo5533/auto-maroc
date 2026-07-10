@@ -7,21 +7,22 @@ import {
   fetchWikipediaFrBundle,
   wikiBundleImageMatchesVehicle,
 } from "@/lib/catalog-media";
-import { getStoredCarImageUrls, getDisplayCarImageUrls } from "@/lib/car-images";
+import { getStoredCarImageUrls, isTrustedCarImageUrl } from "@/lib/car-images";
 import {
-  isCarDemoStockUrl,
-  isPexelsNonDemoUrl,
   isPicsumPlaceholderUrl,
+  isPexelsNonDemoUrl,
+  modelImageSeed,
   pickCarDemoGallery,
 } from "@/lib/car-demo-images";
 
 export { getDisplayCarImageUrls } from "@/lib/car-images";
 
+/** Seules les URLs Picsum (faux placeholders) ou galeries vides déclenchent un rafraîchissement. */
 function needsOpenSourceRefresh(urls: string[]): boolean {
   if (urls.length === 0) return true;
-  return urls.some(
-    (u) => isPicsumPlaceholderUrl(u) || isCarDemoStockUrl(u) || isPexelsNonDemoUrl(u),
-  );
+  if (urls.some(isPicsumPlaceholderUrl)) return true;
+  if (urls.some(isPexelsNonDemoUrl)) return true;
+  return !urls.some(isTrustedCarImageUrl);
 }
 
 function pushWm(u: string | null | undefined, arr: string[]) {
@@ -70,34 +71,60 @@ export async function fetchOpenSourceVehicleImageUrls(
   return imageUrls;
 }
 
+/** Réutilise la galerie d’une autre fiche même marque+modèle (évite 637 appels réseau). */
+async function findSiblingTrustedGallery(
+  prisma: PrismaClient,
+  car: Car,
+): Promise<string[] | null> {
+  if (!car.brandFr?.trim() || !car.modelFr?.trim()) return null;
+
+  const siblings = await prisma.car.findMany({
+    where: {
+      brandFr: car.brandFr,
+      modelFr: car.modelFr,
+      NOT: { id: car.id },
+    },
+    select: { imageUrl: true, imageUrls: true },
+    take: 8,
+  });
+
+  for (const s of siblings) {
+    const urls = getStoredCarImageUrls(s).filter(isTrustedCarImageUrl);
+    if (urls.length > 0) return urls;
+  }
+  return null;
+}
+
 export async function ensureRealVehicleImages(prisma: PrismaClient, car: Car): Promise<string[]> {
   const stored = getStoredCarImageUrls(car);
 
   if (!needsOpenSourceRefresh(stored)) {
-    return stored;
+    return stored.filter(isTrustedCarImageUrl);
   }
 
   const brandFr = car.brandFr?.trim();
   const modelFr = car.modelFr?.trim();
-  const seed = `${brandFr ?? ""}|${modelFr ?? ""}|${car.id}`;
+  const seed = modelImageSeed(brandFr, modelFr);
 
-  if (!brandFr || !modelFr) {
-    const demo = pickCarDemoGallery(car.id, 4);
-    await persistGallery(prisma, car.id, demo);
-    return demo;
+  const sibling = await findSiblingTrustedGallery(prisma, car);
+  if (sibling?.length) {
+    await persistGallery(prisma, car.id, sibling);
+    return sibling;
   }
 
-  try {
-    const fresh = await fetchOpenSourceVehicleImageUrls(brandFr, modelFr, car.modelAr);
-    if (fresh.length > 0) {
-      await persistGallery(prisma, car.id, fresh);
-      return fresh;
+  if (brandFr && modelFr) {
+    try {
+      const fresh = await fetchOpenSourceVehicleImageUrls(brandFr, modelFr, car.modelAr);
+      if (fresh.length > 0) {
+        await persistGallery(prisma, car.id, fresh);
+        return fresh;
+      }
+    } catch {
+      /* repli galerie démo */
     }
-  } catch {
-    /* repli galerie démo */
   }
 
-  const demo = pickCarDemoGallery(seed, 4);
+  const demo = pickCarDemoGallery(seed || car.id, 4);
   await persistGallery(prisma, car.id, demo);
   return demo;
 }

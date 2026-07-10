@@ -96,6 +96,11 @@ export function SignInClient() {
         <button type="submit" className={`${btnPrimary} w-full`}>
           {mode === "login" ? t("submit") : t("submitRegister")}
         </button>
+        {mode === "register" ? (
+          <p className="rounded-xl bg-emerald-50 p-3 text-center text-sm leading-relaxed text-emerald-900 ring-1 ring-emerald-100">
+            {t("registerBenefit")}
+          </p>
+        ) : null}
         <p className="text-center text-xs text-zinc-500">{t("registerHint")}</p>
         {msg && <p className="rounded-xl bg-zinc-50 p-3 text-center text-sm text-zinc-800 ring-1 ring-zinc-200">{msg}</p>}
       </form>

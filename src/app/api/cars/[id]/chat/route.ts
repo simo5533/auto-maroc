@@ -6,6 +6,7 @@ import { buildProductStoryPayload } from "@/lib/car-product-story-build";
 import { answerCarQuestionOffline } from "@/lib/car-ai-offline";
 import { buildCarAiSystemPrompt, buildCarKnowledgeContext } from "@/lib/car-ai-context";
 import { getOpenAiApiKey } from "@/lib/openai-env";
+import { findApprovedReviewsForCar } from "@/lib/car-model-reviews";
 
 const bodySchema = z.object({
   locale: z.enum(["ar", "fr"]),
@@ -39,24 +40,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  const siblingIds = await prisma.car.findMany({
-    where: {
-      year: carBase.year,
-      brandAr: carBase.brandAr,
-      modelAr: carBase.modelAr,
-    },
-    select: { id: true },
-  });
-
-  const modelYearReviews = await prisma.review.findMany({
-    where: {
-      carId: { in: siblingIds.map((r) => r.id) },
-      status: "APPROVED",
-    },
-    orderBy: { createdAt: "desc" },
-    take: 16,
-    select: { commentAr: true, commentFr: true, globalNote: true, city: true },
-  });
+  const { reviews: modelYearReviews } = await findApprovedReviewsForCar(carBase, { take: 16 });
 
   const car = { ...carBase, reviews: modelYearReviews };
 

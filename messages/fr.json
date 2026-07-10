@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Auto Maroc — aide intelligente à l’achat auto",
-    "description": "Catalogue, comparateur, avis anonymisés, assistant IA, pré-diag photo et OBD2."
+    "description": "Catalogue, comparateur, avis anonymisés et assistant IA pour l'achat auto au Maroc."
   },
   "nav": {
     "home": "Accueil",
@@ -21,7 +21,7 @@
     "close": "Fermer"
   },
   "shell": {
-    "topbar": "MAD · Maroc · Pré-diagnostic & aide à l’achat",
+    "topbar": "MAD · Maroc · Aide à l'achat auto",
     "tagline": "Aide intelligente à l’achat auto"
   },
   "legal": {
@@ -48,15 +48,13 @@
   },
   "home": {
     "heroTitle": "Choisissez votre voiture au Maroc, sereinement",
-    "heroSubtitle": "Catalogue local, comparateur, avis anonymisés, puis photo IA et OBD2.",
+    "heroSubtitle": "Catalogue local, comparateur, avis anonymisés et assistant IA.",
     "ctaCatalog": "Voir le catalogue",
     "ctaCompare": "Comparer deux modèles",
     "modulesTitle": "Modules",
     "modCatalog": "Voitures commercialisées au Maroc, filtres et scores.",
     "modReviews": "Avis sans nom complet, modération.",
     "modCompare": "Tableau + conclusion selon budget et usage.",
-    "modPhoto": "Analyse photo (phase 2) et rapport PDF.",
-    "modObd2": "Lecture défauts moteur Bluetooth (phase 3).",
     "modAi": "Assistant basé sur la base interne (RAG à brancher).",
     "valuePropTitle": "Pourquoi Auto Maroc ?",
     "valueLocal": "Données et budgets ancrés au marché marocain (MAD, villes, entretien).",
@@ -171,6 +169,7 @@
     "reviewsEmpty": "Aucun avis publié pour ce modèle et cette année pour l’instant.",
     "reviewsEmptyCta": "Déposez un avis depuis la page Avis (compte requis) ou consultez le catalogue complet sur /reviews.",
     "reviewsSameModelYearHint": "Avis regroupés pour toutes les finitions de ce modèle et cette année (même marque / modèle / millésime), y compris les avis importés du catalogue.",
+    "reviewsOtherYearsHint": "Aucun avis pour ce millésime : affichage d’avis du même modèle sur d’autres années (import Excel).",
     "photos": "Galerie photos",
     "globalNote": "Note globale",
     "reviewTonePositive": "Avis favorable",
@@ -288,9 +287,16 @@
   "account": {
     "title": "Mon compte",
     "eyebrow": "Profil",
-    "subtitle": "Favoris, comparaisons et rapports liés à votre compte.",
+    "subtitle": "Votre historique est sauvegardé : comparaisons et avis liés à votre compte.",
     "signedIn": "Connecté :",
-    "guest": "Connectez-vous pour favoris, comparaisons et rapports."
+    "guest": "Créez un compte pour conserver votre historique (comparaisons, avis).",
+    "historyTitle": "Mon historique",
+    "comparisonsTitle": "Comparaisons enregistrées",
+    "reviewsTitle": "Mes avis",
+    "noComparisons": "Aucune comparaison enregistrée pour le moment.",
+    "noReviews": "Vous n'avez pas encore publié d'avis.",
+    "compareAgain": "Comparer des modèles",
+    "writeReview": "Laisser un avis"
   },
   "auth": {
     "title": "Connexion",
@@ -302,7 +308,8 @@
     "nameOptional": "Nom (optionnel)",
     "submit": "Connexion",
     "submitRegister": "Créer le compte",
-    "registerHint": "Démo : demo@auto-maroc.ma / Demo123!"
+    "registerHint": "Démo : demo@auto-maroc.ma / Demo123!",
+    "registerBenefit": "Avantage du compte : votre historique (comparaisons et avis) reste sauvegardé."
   },
   "admin": {
     "title": "Administration",

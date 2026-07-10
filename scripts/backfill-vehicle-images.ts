@@ -20,9 +20,11 @@ import {
 
 function needsBackfill(urls: string[]): boolean {
   if (urls.length === 0) return true;
-  return urls.some(
-    (u) => isPicsumPlaceholderUrl(u) || isCarDemoStockUrl(u) || isPexelsNonDemoUrl(u),
-  );
+  if (urls.some((u) => isPicsumPlaceholderUrl(u) || isPexelsNonDemoUrl(u))) return true;
+  return !urls.every((u) => {
+    if (isPicsumPlaceholderUrl(u) || isPexelsNonDemoUrl(u)) return false;
+    return u.includes("upload.wikimedia.org") || isCarDemoStockUrl(u);
+  });
 }
 
 function parseArgs() {

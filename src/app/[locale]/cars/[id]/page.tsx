@@ -41,6 +41,9 @@ import {
   reviewComment,
   reviewDisplayLabel,
 } from "@/lib/locale-text";
+import { findApprovedReviewsForCar } from "@/lib/car-model-reviews";
+
+export const dynamic = "force-dynamic";
 
 function reviewOriginLabel(
   origin: ReviewOrigin,
@@ -89,24 +92,8 @@ export default async function CarDetailPage({
   ]);
   if (!carBase) notFound();
 
-  /** Toutes les fiches « même modèle + même année » (plusieurs versions / motorisations). */
-  const siblingCarIds = await prisma.car.findMany({
-    where: {
-      year: carBase.year,
-      brandAr: carBase.brandAr,
-      modelAr: carBase.modelAr,
-    },
-    select: { id: true },
-  });
-
-  const modelYearReviews = await prisma.review.findMany({
-    where: {
-      carId: { in: siblingCarIds.map((r) => r.id) },
-      status: "APPROVED",
-    },
-    orderBy: { createdAt: "desc" },
-    take: 200,
-  });
+  const { reviews: modelYearReviews, scope: reviewScope, siblingCarIds } =
+    await findApprovedReviewsForCar(carBase);
 
   const car = { ...carBase, reviews: modelYearReviews };
 
@@ -421,6 +408,9 @@ export default async function CarDetailPage({
             <h2 className="text-lg font-bold text-zinc-900">{t("reviews")}</h2>
             {siblingCarIds.length > 1 ? (
               <p className="mt-2 text-xs text-zinc-500">{t("reviewsSameModelYearHint")}</p>
+            ) : null}
+            {reviewScope === "model-any-year" ? (
+              <p className="mt-2 text-xs text-amber-700">{t("reviewsOtherYearsHint")}</p>
             ) : null}
             {car.reviews.length === 0 ? (
               <div className="mt-4 space-y-3 rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/80 p-4 text-sm leading-relaxed text-zinc-700">

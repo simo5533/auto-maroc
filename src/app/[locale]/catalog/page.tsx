@@ -10,9 +10,7 @@ import { CatalogToolbar } from "@/components/CatalogToolbar";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { CatalogBrandSection } from "@/components/CatalogBrandSection";
-import { ensureRealVehicleImages, getDisplayCarImageUrls } from "@/lib/vehicle-images-resolve";
-import { getStoredCarImageUrls } from "@/lib/car-images";
-import { isPexelsNonDemoUrl, isPicsumPlaceholderUrl } from "@/lib/car-demo-images";
+import { getDisplayCarImageUrls } from "@/lib/vehicle-images-resolve";
 import { resolveBrandLogoUrl } from "@/lib/brand-assets";
 import { officialModelShowroomUrl } from "@/lib/brand-model-official-links";
 import { carBrandLabel, carModelLabel, carVersionLabel } from "@/lib/locale-text";
@@ -21,52 +19,6 @@ import type { Car, CarSpecs } from "@prisma/client";
 const KEYS = ["q", "minPrice", "maxPrice", "fuel", "transmission", "body", "condition", "usage", "brand"] as const;
 
 type CarRow = Car & { specs: CarSpecs | null };
-
-/**
- * Lance ensureRealVehicleImages avec une concurrence limitée et un budget total :
- * - les cars déjà rafraîchies (Wikimedia / démo whitelistée) sortent vite (needsOpenSourceRefresh).
- * - les cars avec anciennes URLs hors sujet (Picsum, Pexels random) sont mises à jour en DB
- *   pour que la couverture catalogue corresponde à la galerie de la fiche détail.
- *
- * Plafond MAX_REFRESH pour éviter un premier rendu trop long. Le reste sera réparé soit lors
- * de la visite de la fiche, soit en lançant `npm run catalog:backfill-images`.
- */
-function carNeedsRefresh(car: Pick<Car, "imageUrl" | "imageUrls">): boolean {
-  const stored = getStoredCarImageUrls(car);
-  if (stored.length === 0) return true;
-  return stored.some((u) => isPicsumPlaceholderUrl(u) || isPexelsNonDemoUrl(u));
-}
-
-/**
- * Rafraîchit en DB les voitures dont les URLs stockées sont hors sujet ou absentes,
- * pour que la couverture catalogue corresponde à la galerie de la fiche détail.
- * Plafonné (MAX_REFRESH) afin de garder un rendu rapide ; le reste se répare via la
- * visite de fiche ou `npm run catalog:backfill-images`.
- */
-async function refreshCatalogImages(cars: CarRow[]): Promise<void> {
-  const todo = cars.filter(carNeedsRefresh);
-  if (todo.length === 0) return;
-  const CONCURRENCY = 4;
-  const MAX_REFRESH = 40;
-  const slice = todo.slice(0, MAX_REFRESH);
-  let cursor = 0;
-  const workers = Array.from({ length: Math.min(CONCURRENCY, slice.length) }, async () => {
-    while (cursor < slice.length) {
-      const i = cursor++;
-      const car = slice[i]!;
-      try {
-        const fresh = await ensureRealVehicleImages(prisma, car);
-        if (fresh.length > 0) {
-          car.imageUrl = fresh[0] ?? car.imageUrl;
-          car.imageUrls = fresh;
-        }
-      } catch {
-        /* repli déjà géré dans ensureRealVehicleImages */
-      }
-    }
-  });
-  await Promise.all(workers);
-}
 
 function groupByBrand(cars: CarRow[], locale: string): [string, CarRow[]][] {
   const map = new Map<string, CarRow[]>();
@@ -109,7 +61,6 @@ export default async function CatalogPage({
     }
     throw e;
   }
-  await refreshCatalogImages(cars);
   const t = await getTranslations("catalog");
   const grouped = groupByBrand(cars, locale);
 

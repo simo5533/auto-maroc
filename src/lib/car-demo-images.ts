@@ -1,10 +1,9 @@
 /**
  * Images de démonstration (véhicules) lorsque le catalogue n’a pas de médias réels
- * (ex. génération avec CATALOG_SKIP_MEDIA=1) ou remplacement des anciennes URLs Picsum.
- * URLs autorisées dans next.config.ts : images.pexels.com, upload.wikimedia.org.
+ * (Wikipédia / Commons). URLs autorisées dans next.config.ts.
  */
 
-/** IDs Pexels utilisés comme repli générique (vérifiés, photos de voitures uniquement). */
+/** IDs Pexels — photos automobile génériques (repli stable par marque+modèle). */
 const CAR_DEMO_PEXELS_IDS = [
   "112460",
   "210019",
@@ -12,16 +11,18 @@ const CAR_DEMO_PEXELS_IDS = [
   "116675",
   "244206",
   "1149831",
+  "170811",
+  "1592384",
+  "1164774",
+  "3721471",
+  "3802508",
+  "1544617",
 ] as const;
 
-const CAR_DEMO_IMAGE_URLS = [
-  "https://images.pexels.com/photos/112460/pexels-photo-112460.jpeg?auto=compress&cs=tinysrgb&w=1280",
-  "https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg?auto=compress&cs=tinysrgb&w=1280",
-  "https://images.pexels.com/photos/1149137/pexels-photo-1149137.jpeg?auto=compress&cs=tinysrgb&w=1280",
-  "https://images.pexels.com/photos/116675/pexels-photo-116675.jpeg?auto=compress&cs=tinysrgb&w=1280",
-  "https://images.pexels.com/photos/244206/pexels-photo-244206.jpeg?auto=compress&cs=tinysrgb&w=1280",
-  "https://images.pexels.com/photos/1149831/pexels-photo-1149831.jpeg?auto=compress&cs=tinysrgb&w=1280",
-] as const;
+const CAR_DEMO_IMAGE_URLS = CAR_DEMO_PEXELS_IDS.map(
+  (id) =>
+    `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=1280`,
+);
 
 export function hashSeed(s: string): number {
   let h = 2166136261;
@@ -32,7 +33,7 @@ export function hashSeed(s: string): number {
   return Math.abs(h);
 }
 
-/** URL Picsum utilisée comme repli dans d’anciennes générations de catalogue. */
+/** URL Picsum : photos aléatoires (paysage, etc.) — pas des voitures. */
 export function isPicsumPlaceholderUrl(url: string): boolean {
   return typeof url === "string" && url.includes("picsum.photos");
 }
@@ -42,14 +43,19 @@ export function isCarDemoStockUrl(url: string): boolean {
   return CAR_DEMO_PEXELS_IDS.some((id) => url.includes(`/photos/${id}/`));
 }
 
-/** Pexels hors liste démo (ex. résultats API « marque + modèle » souvent non représentatifs). */
+/** Pexels hors banque démo (souvent hors sujet) — à remplacer par Wikimedia ou banque démo. */
 export function isPexelsNonDemoUrl(url: string): boolean {
   if (typeof url !== "string" || !url.includes("images.pexels.com/photos/")) return false;
   return !isCarDemoStockUrl(url);
 }
 
+/** Même marque+modèle → mêmes visuels de repli (pas une rotation par fiche). */
+export function modelImageSeed(brandFr: string | null | undefined, modelFr: string | null | undefined): string {
+  return `${brandFr?.trim() ?? ""}|${modelFr?.trim() ?? ""}`;
+}
+
 /**
- * Galerie déterministe (même graine → mêmes visuels) pour éviter les photos hors sujet.
+ * Galerie déterministe (même graine → mêmes visuels) pour éviter les changements à chaque chargement.
  */
 export function pickCarDemoGallery(seed: string, count: number): string[] {
   const n = Math.min(Math.max(Math.floor(count), 1), 12);

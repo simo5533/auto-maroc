@@ -43,16 +43,6 @@ export function AppFooter() {
                   {t("assistant")}
                 </Link>
               </li>
-              <li>
-                <Link href="/diagnostic-photo" className="text-zinc-700 hover:text-emerald-700">
-                  {t("photo")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/obd2" className="text-zinc-700 hover:text-emerald-700">
-                  {t("obd2")}
-                </Link>
-              </li>
             </ul>
           </div>
           <div>

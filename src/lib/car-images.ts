@@ -2,6 +2,7 @@ import {
   isCarDemoStockUrl,
   isPexelsNonDemoUrl,
   isPicsumPlaceholderUrl,
+  modelImageSeed,
   pickCarDemoGallery,
 } from "@/lib/car-demo-images";
 
@@ -31,7 +32,7 @@ export function isTrustedCarImageUrl(url: string): boolean {
 export function getDisplayCarImageUrls(car: CarImageDisplayFields): string[] {
   const stored = getStoredCarImageUrls(car).filter(isTrustedCarImageUrl);
   if (stored.length > 0) return stored;
-  return pickCarDemoGallery(`${car.brandFr ?? ""}|${car.modelFr ?? ""}|${car.id}`, 4);
+  return pickCarDemoGallery(modelImageSeed(car.brandFr, car.modelFr) || car.id, 4);
 }
 
 export function getCarCoverImageUrl(car: CarImageDisplayFields): string | null {

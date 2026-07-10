@@ -82,8 +82,6 @@ export function Shell({
     { href: "/compare", label: t("compare") },
     { href: "/reviews", label: t("reviews") },
     { href: "/assistant", label: t("assistant") },
-    { href: "/diagnostic-photo", label: t("photo") },
-    { href: "/obd2", label: t("obd2") },
     { href: "/account", label: t("account") },
   ];
 
