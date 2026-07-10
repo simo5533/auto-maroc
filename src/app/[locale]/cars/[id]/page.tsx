@@ -27,6 +27,13 @@ import { Car3DViewer } from "@/components/Car3DViewer";
 import { buildCarCriteriaRatings, type CarCriterionId } from "@/lib/car-criteria-ratings";
 import { CarCriteriaStars } from "@/components/CarCriteriaStars";
 import {
+  carSpecComfort,
+  carSpecDimensions,
+  carSpecEngine,
+  carSpecPartsAvailability,
+  carSpecSafety,
+} from "@/lib/car-specs-locale";
+import {
   carBrandLabel,
   carModelLabel,
   carVersionLabel,
@@ -167,6 +174,12 @@ export default async function CarDetailPage({
     label: t(criteriaLabelKey[row.id]),
   }));
   const overallCriteriaPct = criteriaRatings.find((r) => r.id === "overall")?.percentage ?? 72;
+
+  const specEngine = carSpecEngine(car.specs, locale);
+  const specDimensions = carSpecDimensions(car.specs, locale);
+  const specParts = carSpecPartsAvailability(car.specs, locale);
+  const specSafety = carSpecSafety(car.specs, locale);
+  const specComfort = carSpecComfort(car.specs, locale);
 
   const viewer3dExterior = car.specs?.viewer3dExteriorUrl?.trim() || null;
   const viewer3dInterior = car.specs?.viewer3dInteriorUrl?.trim() || null;
@@ -311,12 +324,10 @@ export default async function CarDetailPage({
                 <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Transmission</dt>
                 <dd className="mt-1 font-semibold text-zinc-900">{car.transmission}</dd>
               </div>
-              {car.specs?.engineAr && (
+              {specEngine && (
                 <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100 sm:col-span-2">
                   <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Motorisation</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">
-                    {locale === "ar" ? car.specs.engineAr : car.specs.engineFr ?? car.specs.engineAr}
-                  </dd>
+                  <dd className="mt-1 font-semibold text-zinc-900">{specEngine}</dd>
                 </div>
               )}
               {car.specs?.consumptionL100 != null && (
@@ -325,10 +336,10 @@ export default async function CarDetailPage({
                   <dd className="mt-1 font-semibold text-zinc-900">{car.specs.consumptionL100} L/100 km</dd>
                 </div>
               )}
-              {car.specs?.dimensionsAr && (
+              {specDimensions && (
                 <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
                   <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Dimensions</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">{car.specs.dimensionsAr}</dd>
+                  <dd className="mt-1 font-semibold text-zinc-900">{specDimensions}</dd>
                 </div>
               )}
               {car.specs?.seats != null && (
@@ -367,26 +378,26 @@ export default async function CarDetailPage({
                   <dd className="mt-1 font-semibold text-zinc-900">{car.specs.maintenanceCostEst.toLocaleString()} MAD / an</dd>
                 </div>
               )}
-              {car.specs?.partsAvailabilityAr && (
+              {specParts && (
                 <div className="sm:col-span-2">
                   <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">{t("parts")}</dt>
                   <dd className="mt-2 rounded-xl bg-emerald-50/80 p-4 text-base text-zinc-800 ring-1 ring-emerald-100">
-                    {car.specs.partsAvailabilityAr}
+                    {specParts}
                   </dd>
                 </div>
               )}
-              {(car.specs?.safetyAr || car.specs?.comfortAr) && (
+              {(specSafety || specComfort) && (
                 <div className="sm:col-span-2 space-y-3 rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                  {car.specs.safetyAr ? (
+                  {specSafety ? (
                     <div>
                       <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Sécurité</dt>
-                      <dd className="mt-1 text-base text-zinc-800">{car.specs.safetyAr}</dd>
+                      <dd className="mt-1 text-base text-zinc-800">{specSafety}</dd>
                     </div>
                   ) : null}
-                  {car.specs.comfortAr ? (
+                  {specComfort ? (
                     <div>
                       <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Confort</dt>
-                      <dd className="mt-1 text-base text-zinc-800">{car.specs.comfortAr}</dd>
+                      <dd className="mt-1 text-base text-zinc-800">{specComfort}</dd>
                     </div>
                   ) : null}
                 </div>

@@ -248,6 +248,24 @@ export function buildRichSpecs(args: {
           : `بنزين — ${versionAr}.`;
 
   const dimsAr = `طول تقريبي ${lengthM} م، عرض وارتفاع وقاعدة العجلات حسب النسخة (إرشادي — راجع الوكيل).`;
+  const bodyFr =
+    body === "CITY_CAR"
+      ? "citadine"
+      : body === "SEDAN"
+        ? "berline"
+        : body === "SUV"
+          ? "SUV"
+          : body === "PICKUP"
+            ? "pick-up"
+            : body === "COMMERCIAL"
+              ? "utilitaire"
+              : "familiale";
+  const dimsFr = `Longueur indicative env. ${lengthM} m — largeur, hauteur et empattement selon finition (indicatif, à confirmer chez le concessionnaire).`;
+  const partsAr = idx % 3 === 0 ? "ممتازة في الدار البيضاء والرباط" : "جيدة في المدن الكبرى";
+  const partsFr =
+    idx % 3 === 0
+      ? "Excellente disponibilité à Casablanca et Rabat"
+      : "Bonne disponibilité dans les grandes villes";
 
   return {
     engineFr,
@@ -256,13 +274,18 @@ export function buildRichSpecs(args: {
     realPowerKw: kw,
     ...(cons != null ? { consumptionL100: Math.round(cons * 10) / 10 } : {}),
     dimensionsAr: dimsAr,
+    dimensionsFr: dimsFr,
     seats,
     trunkL: trunk,
     safetyAr: `وسائد هوائية أمامية وجانبية حسب التجهيز، ABS، ESP، مساعدة فرملة. ملخص فئة ${body}.`,
+    safetyFr: `Airbags avant/latéraux selon finition, ABS, ESP, aide au freinage. Synthèse segment ${bodyFr}.`,
     comfortAr: `مكيف يدوي أو أوتوماتيك، USB/بلوتوث، شاشة وسائط حسب الفئة، مقاعد قماش أو جلد جزئي.`,
+    comfortFr: `Climatisation manuelle ou automatique, USB/Bluetooth, écran multimédia selon finition, sièges tissu ou cuir partiel.`,
     warrantyAr: `ضمان الوكيل أو المستورد حسب العلامة — يُؤكد عند الشراء.`,
+    warrantyFr: `Garantie concessionnaire ou importateur selon la marque — à confirmer à l'achat.`,
     maintenanceCostEst: 2800 + (idx % 10) * 420,
-    partsAvailabilityAr: idx % 3 === 0 ? "ممتازة في الدار البيضاء والرباط" : "جيدة في المدن الكبرى",
+    partsAvailabilityAr: partsAr,
+    partsAvailabilityFr: partsFr,
     reliabilityScore: 70 + (idx % 22),
     resaleScore: 68 + (idx % 24),
     comfortScore: 66 + (idx % 26),

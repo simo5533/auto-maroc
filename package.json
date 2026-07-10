@@ -21,6 +21,7 @@
     "reviews:import-docx": "tsx scripts/import-reviews-docx.ts",
     "reviews:generate-darija": "tsx scripts/generate-reviews-darija.ts",
     "reviews:import-xlsx": "tsx scripts/import-reviews-xlsx.ts",
+    "specs:backfill-fr": "tsx scripts/backfill-specs-fr.ts",
     "reviews:google": "tsx scripts/fetch-google-place-reviews.ts",
     "reviews:backfill-origin": "tsx scripts/backfill-review-origin.ts",
     "cars:import-3d": "tsx scripts/import-car-3d-links.ts",

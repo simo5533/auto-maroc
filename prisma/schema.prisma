@@ -133,13 +133,18 @@ model CarSpecs {
   realPowerKw          Float?
   consumptionL100      Float?
   dimensionsAr         String?
+  dimensionsFr         String?
   seats                Int?
   trunkL               Int?
   safetyAr             String?
+  safetyFr             String?
   comfortAr            String?
+  comfortFr            String?
   warrantyAr           String?
+  warrantyFr           String?
   maintenanceCostEst Int?
   partsAvailabilityAr  String?
+  partsAvailabilityFr  String?
   reliabilityScore     Int?
   resaleScore          Int?
   comfortScore         Int?
