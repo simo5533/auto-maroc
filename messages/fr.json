@@ -257,7 +257,7 @@
     "city": "Ville",
     "months": "Durée de possession (mois)",
     "kms": "Kilométrage",
-    "comment": "Commentaire (darija requis)",
+    "comment": "Commentaire en darija (alphabet latin, ex. : mzyan bzzaf)",
     "submit": "Envoyer"
   },
   "assistant": {

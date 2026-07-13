@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { ReviewOrigin, ReviewStatus } from "@prisma/client";
+import { toDarijaLatin } from "@/lib/darija-latin";
 
 export async function GET(req: Request) {
   const carId = new URL(req.url).searchParams.get("carId");
@@ -46,15 +47,20 @@ export async function POST(req: Request) {
   if (!car) return NextResponse.json({ error: "car_not_found" }, { status: 404 });
 
   const displayLabel =
-        d.usageMonths != null && d.mileageKm != null
-          ? `مالك منذ ${d.usageMonths} شهرًا تقريبًا — ${d.city} — ${d.mileageKm.toLocaleString("ar-MA")} كم`
-          : `مالك — ${d.city}`;
+    d.usageMonths != null && d.mileageKm != null
+      ? `Malek depuis ~${d.usageMonths} chhor — ${d.city} — ${d.mileageKm.toLocaleString("fr-FR")} km`
+      : `Malek — ${d.city}`;
+  const displayLabelFr =
+    d.usageMonths != null && d.mileageKm != null
+      ? `Propriétaire — env. ${d.usageMonths} mois — ${d.city} — ${d.mileageKm.toLocaleString("fr-FR")} km`
+      : `Propriétaire — ${d.city}`;
 
   const review = await prisma.review.create({
     data: {
       carId: d.carId,
       userId: session.sub,
       displayLabel,
+      displayLabelFr,
       city: d.city,
       usageMonths: d.usageMonths ?? null,
       mileageKm: d.mileageKm ?? null,
@@ -64,7 +70,7 @@ export async function POST(req: Request) {
       maintenanceNote: d.maintenanceNote ?? null,
       resaleNote: d.resaleNote ?? null,
       globalNote: d.globalNote ?? null,
-      commentAr: d.commentAr,
+      commentAr: toDarijaLatin(d.commentAr),
       commentFr: d.commentFr ?? null,
       reviewOrigin: ReviewOrigin.USER,
       status: ReviewStatus.PENDING,

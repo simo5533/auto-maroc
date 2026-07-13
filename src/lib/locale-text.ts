@@ -1,3 +1,5 @@
+import { toDarijaLatin } from "@/lib/darija-latin";
+
 export type AppLocale = "ar" | "fr";
 
 export function toAppLocale(locale: string): AppLocale {
@@ -40,7 +42,11 @@ export function reviewComment(
   review: { commentAr: string; commentFr: string | null },
   locale: string,
 ): string {
-  return pickLocaleText(locale, review.commentAr, review.commentFr);
+  if (toAppLocale(locale) === "ar") {
+    // Mode darija : alphabet latin (franco-arabe), pas le script arabe.
+    return toDarijaLatin(review.commentAr);
+  }
+  return review.commentFr?.trim() ?? "";
 }
 
 export function reviewDisplayLabel(
@@ -54,7 +60,12 @@ export function reviewDisplayLabel(
   locale: string,
 ): string {
   if (toAppLocale(locale) === "ar") {
-    return review.displayLabel?.trim() || review.city;
+    // Labels aussi en alphabet latin (Karim — Casablanca…), pas محمد / الدار البيضاء.
+    const latin =
+      review.displayLabelFr?.trim() ||
+      toDarijaLatin(review.displayLabel) ||
+      review.city;
+    return latin;
   }
   if (review.displayLabelFr?.trim()) {
     return review.displayLabelFr.trim();

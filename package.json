@@ -22,6 +22,7 @@
     "reviews:generate-darija": "tsx scripts/generate-reviews-darija.ts",
     "reviews:import-xlsx": "tsx scripts/import-reviews-xlsx.ts",
     "reviews:fill-empty-models": "tsx scripts/fill-empty-model-reviews.ts",
+    "reviews:darija-latin": "tsx scripts/backfill-reviews-darija-latin.ts",
     "specs:backfill-fr": "tsx scripts/backfill-specs-fr.ts",
     "reviews:google": "tsx scripts/fetch-google-place-reviews.ts",
     "reviews:backfill-origin": "tsx scripts/backfill-review-origin.ts",

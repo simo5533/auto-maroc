@@ -166,11 +166,11 @@ export function buildDisplayLabels(input: {
   cityFr: string;
   serviceFr: string;
 }): { displayLabel: string; displayLabelFr: string } {
-  const { nameAr, nameFr } = virtualOwnerNames(input.seed);
-  const cityAr = cityLabelAr(input.cityFr);
-  const serviceAr = serviceLabelAr(input.serviceFr);
+  const { nameFr } = virtualOwnerNames(input.seed);
+  // Mode darija = alphabet latin (franco-arabe), pas le script arabe.
+  const latin = `${nameFr} — ${input.cityFr} — ${input.serviceFr}`.slice(0, 200);
   return {
-    displayLabel: `${nameAr} — ${cityAr} — ${serviceAr}`.slice(0, 200),
-    displayLabelFr: `${nameFr} — ${input.cityFr} — ${input.serviceFr}`.slice(0, 200),
+    displayLabel: latin,
+    displayLabelFr: latin,
   };
 }

@@ -18,6 +18,7 @@ import { homedir } from "node:os";
 import { PrismaClient, ReviewOrigin, ReviewStatus } from "@prisma/client";
 import * as XLSX from "xlsx";
 import { loadEnvFiles } from "./lib/load-env";
+import { toDarijaLatin } from "../src/lib/darija-latin";
 import { buildCarMatcher, cleanReviewText } from "./lib/review-import-match";
 import { buildDisplayLabels } from "./lib/virtual-review-names";
 
@@ -142,7 +143,9 @@ async function main() {
     }
 
     const labels = buildDisplayLabels({ seed, cityFr: ville, serviceFr: service });
-    const commentAr = cleanReviewText(String(r.commentaire_darija ?? ""), String(r.titre_darija ?? ""));
+    const commentAr = toDarijaLatin(
+      cleanReviewText(String(r.commentaire_darija ?? ""), String(r.titre_darija ?? "")),
+    );
     const commentFr = cleanReviewText(String(r.commentaire_francais ?? ""), String(r.titre_francais ?? ""));
     if (!commentAr.trim() || !commentFr.trim()) {
       skipped++;
