@@ -1,22 +1,28 @@
 /** Classes réutilisables — design system Auto Maroc (sans dépendance clsx). */
 
-export const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2";
+export const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-ink";
 
 export const btnPrimary =
-  `inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 active:scale-[0.98] ${focusRing}`;
+  `inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] bg-accent px-6 text-sm font-semibold text-accent-ink transition duration-200 hover:bg-accent-hover active:scale-[0.98] ${focusRing}`;
 
 export const btnSecondary =
-  `inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-800 shadow-sm transition hover:border-zinc-400 hover:bg-zinc-50 active:scale-[0.98] ${focusRing}`;
+  `inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] border border-line-strong bg-transparent px-6 text-sm font-semibold text-fg transition duration-200 hover:border-white/35 hover:bg-white/[0.03] active:scale-[0.98] ${focusRing}`;
 
 export const btnGhost =
-  `inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 ${focusRing}`;
+  `inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-medium text-fg-muted transition hover:bg-white/[0.05] hover:text-fg ${focusRing}`;
 
 export const inputBase =
-  `w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 shadow-inner transition placeholder:text-zinc-400 hover:border-zinc-300 ${focusRing}`;
+  `w-full min-h-11 rounded-[10px] border border-line bg-carbon px-3.5 text-sm text-fg transition placeholder:text-steel hover:border-line-strong ${focusRing}`;
 
 export const selectBase = inputBase;
 
-export const cardBase =
-  "rounded-2xl border border-zinc-200/90 bg-white shadow-[0_2px_8px_-2px_rgba(15,23,42,0.08),0_0_0_1px_rgba(15,23,42,0.04)]";
+export const cardBase = "rounded-[14px] border border-line bg-graphite";
 
-export const cardHover = "transition-shadow hover:shadow-[0_8px_24px_-4px_rgba(15,23,42,0.12)]";
+export const cardHover = "transition duration-200 hover:border-line-strong";
+
+/** Conteneur de page pleine largeur (accueil, catalogue, fiche). */
+export const container = "mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12";
+
+/** Petit label éditorial (au-dessus des titres). */
+export const eyebrow = "text-[11px] font-semibold uppercase tracking-[0.22em] text-accent";

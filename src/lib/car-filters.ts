@@ -10,12 +10,15 @@ export function carWhereFromSearchParams(sp: URLSearchParams): Prisma.CarWhereIn
   const q = sp.get("q")?.trim();
   if (q) {
     where.OR = [
-      { brandAr: { contains: q } },
-      { brandFr: { contains: q } },
-      { modelAr: { contains: q } },
-      { modelFr: { contains: q } },
+      { brandAr: { contains: q, mode: "insensitive" } },
+      { brandFr: { contains: q, mode: "insensitive" } },
+      { modelAr: { contains: q, mode: "insensitive" } },
+      { modelFr: { contains: q, mode: "insensitive" } },
     ];
   }
+
+  const year = Number(sp.get("year"));
+  if (Number.isInteger(year) && year > 1900 && year < 2100) where.year = year;
 
   const price: Prisma.IntFilter = {};
   const minP = sp.get("minPrice");

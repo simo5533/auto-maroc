@@ -1,39 +1,237 @@
 @import "tailwindcss";
 
-:root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --card: #ffffff;
-  --border: rgba(15, 23, 42, 0.08);
-  --primary: #059669;
-  --primary-dark: #047857;
-  --ring: rgba(16, 185, 129, 0.35);
+/*
+ * Design system Auto Maroc — « Dark Performance ».
+ *
+ * Les palettes zinc / emerald / amber / rose / sky / white sont redéfinies en version
+ * sombre inversée : les composants historiques (pensés en thème clair) héritent
+ * automatiquement du thème sombre. « emerald » est l'alias de l'accent unique (or Sahara).
+ */
+@theme {
+  --color-ink: #08090a;
+  --color-graphite: #0f1114;
+  --color-carbon: #15181c;
+  --color-titanium: #20242a;
+  --color-steel: #737b85;
+  --color-fg: #f5f5f3;
+  --color-fg-muted: #a3a8ae;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.16);
+  --color-glass: rgba(18, 20, 24, 0.68);
+  --color-accent: #d4a95f;
+  --color-accent-hover: #e0bc7c;
+  --color-accent-ink: #0b0b0c;
+
+  --color-white: #101216;
+
+  --color-zinc-50: #14171b;
+  --color-zinc-100: #1a1d22;
+  --color-zinc-200: #262a30;
+  --color-zinc-300: #343940;
+  --color-zinc-400: #5c636c;
+  --color-zinc-500: #8b9199;
+  --color-zinc-600: #a3a8ae;
+  --color-zinc-700: #c3c7cb;
+  --color-zinc-800: #dcdfe1;
+  --color-zinc-900: #f0f1ef;
+  --color-zinc-950: #f5f5f3;
+
+  --color-slate-50: #14171b;
+  --color-slate-100: #1a1d22;
+  --color-slate-200: #262a30;
+  --color-slate-300: #343940;
+  --color-slate-400: #5c636c;
+  --color-slate-500: #8b9199;
+  --color-slate-600: #a3a8ae;
+  --color-slate-700: #c3c7cb;
+  --color-slate-800: #dcdfe1;
+  --color-slate-900: #f0f1ef;
+  --color-slate-950: #f5f5f3;
+
+  --color-emerald-50: #16140f;
+  --color-emerald-100: #1d1a12;
+  --color-emerald-200: #362d1c;
+  --color-emerald-300: #5c4a2a;
+  --color-emerald-400: #9c7d45;
+  --color-emerald-500: #c29a55;
+  --color-emerald-600: #d4a95f;
+  --color-emerald-700: #e0bc7c;
+  --color-emerald-800: #eacd98;
+  --color-emerald-900: #f2ddb6;
+  --color-emerald-950: #f8edd6;
+
+  --color-amber-50: #1a140a;
+  --color-amber-100: #241b0c;
+  --color-amber-200: #47351a;
+  --color-amber-300: #6e5222;
+  --color-amber-400: #a97c2e;
+  --color-amber-500: #d29a35;
+  --color-amber-600: #e3ae4e;
+  --color-amber-700: #ebc072;
+  --color-amber-800: #f2d298;
+  --color-amber-900: #f7e3bd;
+  --color-amber-950: #fbf1dc;
+
+  --color-rose-50: #1c0f12;
+  --color-rose-100: #271418;
+  --color-rose-200: #4a1e27;
+  --color-rose-300: #742c3a;
+  --color-rose-400: #ad4357;
+  --color-rose-500: #d35d70;
+  --color-rose-600: #e07b8b;
+  --color-rose-700: #ea9aa6;
+  --color-rose-800: #f2bcc4;
+  --color-rose-900: #f8dbdf;
+  --color-rose-950: #fceef0;
+
+  --color-sky-50: #0d161c;
+  --color-sky-100: #112029;
+  --color-sky-200: #1b3646;
+  --color-sky-300: #285068;
+  --color-sky-400: #3f7fa6;
+  --color-sky-500: #5ea3cc;
+  --color-sky-600: #7db8db;
+  --color-sky-700: #9ccbe6;
+  --color-sky-800: #beddf0;
+  --color-sky-900: #dceef8;
+  --color-sky-950: #eef7fc;
+
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --header-h: 72px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--color-ink);
+  --color-foreground: var(--color-fg);
+  --font-sans: var(--font-display), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
 }
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
+  background-color: var(--color-ink);
 }
 
 body {
-  background-color: var(--background);
-  background-image:
-    radial-gradient(ellipse 120% 80% at 50% -30%, rgba(16, 185, 129, 0.12), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(59, 130, 246, 0.06), transparent 45%);
-  color: var(--foreground);
+  background-color: var(--color-ink);
+  color: var(--color-fg);
   font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background-color: rgba(16, 185, 129, 0.25);
-  color: #0f172a;
+  background-color: rgba(212, 169, 95, 0.32);
+  color: var(--color-fg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea {
+  color-scheme: dark;
+}
+
+/* Surfaces flottantes uniquement (header, filtres, panneaux, CTA mobile). */
+.glass {
+  background-color: var(--color-glass);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+
+/* Fond « showroom » : centre légèrement éclairé, bords sombres. */
+.showroom-stage {
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 58%, rgba(255, 255, 255, 0.07), transparent 70%),
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(212, 169, 95, 0.05), transparent 65%),
+    linear-gradient(180deg, #121418 0%, #0b0c0e 100%);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Apparition au scroll (pilotée par <Reveal />). */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s var(--ease-premium),
+    transform 0.6s var(--ease-premium);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-fade {
+  animation: page-fade 0.16s ease-out both;
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sheet-in {
+  animation: sheet-in 0.26s var(--ease-premium) backwards;
+}
+
+@keyframes img-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.img-fade {
+  animation: img-fade 0.35s ease-out both;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #15181c 0%, #1d2026 50%, #15181c 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s linear infinite;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 @keyframes home-marquee {
@@ -110,11 +308,30 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .page-fade,
+  .sheet-in,
+  .img-fade,
+  .skeleton,
   .animate-home-marquee,
   .animate-home-float,
   .animate-home-blink,
   .animate-compare-rise,
   .animate-compare-pop {
     animation: none !important;
+  }
+
+  .motion-scale {
+    transform: none !important;
+    transition: none !important;
   }
 }

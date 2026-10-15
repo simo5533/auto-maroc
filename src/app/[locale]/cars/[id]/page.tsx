@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ReviewOrigin } from "@prisma/client";
@@ -6,15 +7,16 @@ import Image from "next/image";
 import { isDatabaseConfigured } from "@/lib/db-ready";
 import { prisma } from "@/lib/prisma";
 import { DatabaseRequiredMessage } from "@/components/DatabaseRequiredMessage";
-import { ensureRealVehicleImages } from "@/lib/vehicle-images-resolve";
+import { getDisplayCarImageUrls } from "@/lib/car-images";
 import { resolveExteriorColors } from "@/lib/exterior-color";
 import { resolveBrandLogoUrl } from "@/lib/brand-assets";
 import { Link } from "@/i18n/navigation";
-import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ScoreGauge } from "@/components/ScoreGauge";
-import { btnPrimary, btnSecondary } from "@/components/ui/styles";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { IconArrowRight, IconChevronRight, IconExternal } from "@/components/ui/icons";
+import { btnPrimary, btnSecondary, container, eyebrow, focusRing } from "@/components/ui/styles";
 import { parseFicheEquipement } from "@/lib/car-fiche-equipment";
 import { CarEquipmentSheet } from "@/components/CarEquipmentSheet";
 import { officialModelShowroomUrl } from "@/lib/brand-model-official-links";
@@ -26,6 +28,14 @@ import { isOpenAiConfigured } from "@/lib/openai-env";
 import { Car3DViewer } from "@/components/Car3DViewer";
 import { buildCarCriteriaRatings, type CarCriterionId } from "@/lib/car-criteria-ratings";
 import { CarCriteriaStars } from "@/components/CarCriteriaStars";
+import { Reveal } from "@/components/motion/Reveal";
+import { PriceBlock } from "@/components/vehicle/PriceBlock";
+import { SpecsGrid, type EssentialSpec } from "@/components/vehicle/SpecsGrid";
+import { StickyCTA } from "@/components/vehicle/StickyCTA";
+import { VehicleCard } from "@/components/vehicle/VehicleCard";
+import { VehicleGallery } from "@/components/vehicle/VehicleGallery";
+import { formatPriceDh, getSimilarVehicles, kwToHp, positivePrice } from "@/lib/showcase";
+import { bodyLabel, conditionLabel, fuelLabel, gearboxLabel } from "@/lib/vehicle-labels";
 import {
   carSpecComfort,
   carSpecDimensions,
@@ -68,6 +78,45 @@ function reviewToneKind(globalNote: number | null): "positive" | "critical" | "m
   return "mixed";
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale, id } = await params;
+  if (!isDatabaseConfigured()) return {};
+  try {
+    const car = await prisma.car.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        brandAr: true,
+        brandFr: true,
+        modelAr: true,
+        modelFr: true,
+        versionAr: true,
+        versionFr: true,
+        year: true,
+        descriptionAr: true,
+        descriptionFr: true,
+        imageUrl: true,
+        imageUrls: true,
+      },
+    });
+    if (!car) return {};
+    const name = `${carBrandLabel(car, locale)} ${carModelLabel(car, locale)} ${car.year}`;
+    const description = pickLocaleText(locale, car.descriptionAr, car.descriptionFr).slice(0, 160);
+    const cover = getDisplayCarImageUrls(car)[0];
+    return {
+      title: `${name} — ${carVersionLabel(car, locale)} | Auto Maroc`,
+      description: description || undefined,
+      openGraph: cover ? { images: [{ url: cover }] } : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
 /* Catalogues pros/cons et `derivePopularIssues` : voir `@/lib/car-pros-cons`. */
 
 export default async function CarDetailPage({
@@ -80,7 +129,8 @@ export default async function CarDetailPage({
   }
 
   const { locale, id } = await params;
-  const [carBase, t, tc] = await Promise.all([
+  const loc = locale === "ar" ? "ar" : "fr";
+  const [carBase, t, tc, tu, tcat] = await Promise.all([
     prisma.car.findUnique({
       where: { id },
       include: {
@@ -89,20 +139,25 @@ export default async function CarDetailPage({
     }),
     getTranslations("car"),
     getTranslations("common"),
+    getTranslations("ui"),
+    getTranslations("catalog"),
   ]);
   if (!carBase) notFound();
 
-  const { reviews: modelYearReviews, scope: reviewScope, siblingCarIds } =
-    await findApprovedReviewsForCar(carBase);
+  const [{ reviews: modelYearReviews, scope: reviewScope, siblingCarIds }, similar] = await Promise.all([
+    findApprovedReviewsForCar(carBase),
+    getSimilarVehicles(carBase, loc, 3).catch(() => []),
+  ]);
 
   const car = { ...carBase, reviews: modelYearReviews };
 
-  const title =
-    locale === "ar"
-      ? `${carBrandLabel(car, locale)} ${carModelLabel(car, locale)} — ${carVersionLabel(car, locale)}`
-      : `${carBrandLabel(car, locale)} ${carModelLabel(car, locale)}`;
+  const brand = carBrandLabel(car, locale);
+  const model = carModelLabel(car, locale);
+  const version = carVersionLabel(car, locale);
+  const title = locale === "ar" ? `${brand} ${model} — ${version}` : `${brand} ${model}`;
+  const price = positivePrice(car.priceNewEst);
 
-  const images = await ensureRealVehicleImages(prisma, car);
+  const images = getDisplayCarImageUrls(car);
   const logoUrl = resolveBrandLogoUrl(car.brandFr, car.brandLogoUrl);
   const fiche = car.specs ? parseFicheEquipement(car.specs.ficheEquipement) : null;
   const officialModelPageUrl = officialModelShowroomUrl(car.brandFr, car.modelFr);
@@ -111,6 +166,7 @@ export default async function CarDetailPage({
   const descriptionWithColor = `${descriptionBase}\n\n${t("exteriorColorInDescription", {
     color: locale === "ar" ? exterior.ar : exterior.fr,
   })}`;
+  const highlights = pickLocaleText(locale, car.highlightsAr, car.highlightsFr);
 
   const productStory =
     parseProductStory(car.specs?.productStory) ??
@@ -167,339 +223,345 @@ export default async function CarDetailPage({
   const specParts = carSpecPartsAvailability(car.specs, locale);
   const specSafety = carSpecSafety(car.specs, locale);
   const specComfort = carSpecComfort(car.specs, locale);
+  const specWarranty = car.specs ? pickLocaleText(locale, car.specs.warrantyAr, car.specs.warrantyFr) : "";
 
   const viewer3dExterior = car.specs?.viewer3dExteriorUrl?.trim() || null;
   const viewer3dInterior = car.specs?.viewer3dInteriorUrl?.trim() || null;
   const hasViewer3d = Boolean(viewer3dExterior || viewer3dInterior);
+  const officialHref = car.officialUrl || officialModelPageUrl;
+
+  const nf = loc === "ar" ? "ar-MA" : "fr-FR";
+  const num = (n: number) => n.toLocaleString(nf);
+  const s = car.specs;
+  const powerHp = kwToHp(s?.realPowerKw);
+  const essentials: EssentialSpec[] = [
+    powerHp != null ? { key: "power", label: tu("powerLabel"), value: num(powerHp), unit: tu("powerUnit") } : null,
+    s?.torqueNm != null && s.torqueNm > 0 ? { key: "torque", label: tu("torqueLabel"), value: num(s.torqueNm), unit: "N·m" } : null,
+    s?.consumptionL100 != null && s.consumptionL100 > 0
+      ? { key: "consumption", label: tu("consumptionLabel"), value: num(s.consumptionL100), unit: "L/100 km" }
+      : null,
+    s?.co2Gkm != null && s.co2Gkm > 0 ? { key: "co2", label: tu("co2Label"), value: num(s.co2Gkm), unit: "g/km" } : null,
+    s?.seats != null && s.seats > 0 ? { key: "seats", label: tu("seatsLabel"), value: num(s.seats) } : null,
+    s?.trunkL != null && s.trunkL > 0 ? { key: "trunk", label: tu("trunkLabel"), value: num(s.trunkL), unit: "L" } : null,
+    s?.fiscalPower != null && s.fiscalPower > 0 ? { key: "fiscal", label: tu("fiscalLabel"), value: num(s.fiscalPower), unit: tu("fiscalUnit") } : null,
+  ].filter((x): x is EssentialSpec => x != null);
+
+  const fullSpecs: { key: string; label: string; value: string; wide?: boolean }[] = [
+    { key: "version", label: tu("versionLabel"), value: version },
+    { key: "year", label: tu("yearLabel"), value: String(car.year) },
+    { key: "fuel", label: tu("fuelLabel"), value: fuelLabel(tcat, car.fuel) },
+    { key: "gearbox", label: tu("gearboxLabel"), value: gearboxLabel(tcat, car.transmission) },
+    { key: "body", label: tu("bodyLabel"), value: bodyLabel(tcat, car.bodyType) },
+    specEngine ? { key: "engine", label: tu("engineLabel"), value: specEngine, wide: true } : null,
+    specDimensions ? { key: "dimensions", label: tu("dimensionsLabel"), value: specDimensions } : null,
+    s?.groundClearanceMm != null && s.groundClearanceMm > 0
+      ? { key: "clearance", label: tu("groundClearanceLabel"), value: `${num(s.groundClearanceMm)} mm` }
+      : null,
+    s?.maintenanceCostEst != null && s.maintenanceCostEst > 0
+      ? { key: "maintenance", label: tu("maintenanceLabel"), value: `${num(s.maintenanceCostEst)} MAD / an` }
+      : null,
+    specWarranty ? { key: "warranty", label: tu("warrantyLabel"), value: specWarranty } : null,
+    specSafety ? { key: "safety", label: tu("safetyLabel"), value: specSafety, wide: true } : null,
+    specComfort ? { key: "comfort", label: tu("comfortLabel"), value: specComfort, wide: true } : null,
+    specParts ? { key: "parts", label: t("parts"), value: specParts, wide: true } : null,
+  ].filter((x): x is { key: string; label: string; value: string; wide?: boolean } => x != null);
+
+  const chips = [fuelLabel(tcat, car.fuel), gearboxLabel(tcat, car.transmission), bodyLabel(tcat, car.bodyType)];
 
   return (
-    <article className="space-y-8">
-      <PageHeader
-        eyebrow={car.year.toString()}
-        title={title}
-        description={descriptionWithColor}
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <Link href={`/compare?a=${car.id}`} className={btnPrimary}>
-              {tc("compareLink")}
+    <article className="pb-28 lg:pb-24">
+      <nav aria-label="Breadcrumb" className={`${container} pt-6`}>
+        <ol className="flex flex-wrap items-center gap-1.5 text-[13px] text-steel">
+          <li>
+            <Link href="/catalog" className={`rounded hover:text-fg ${focusRing}`}>
+              {tu("breadcrumbCatalog")}
             </Link>
-            <Link href="/catalog" className={btnSecondary}>
-              {tc("backCatalog")}
+          </li>
+          <li aria-hidden>
+            <IconChevronRight size={13} className="rtl:rotate-180" />
+          </li>
+          <li>
+            <Link href={`/catalog?brand=${encodeURIComponent(car.brandFr?.trim() || car.brandAr.trim())}`} className={`rounded hover:text-fg ${focusRing}`}>
+              {brand}
             </Link>
-            {hasViewer3d ? (
-              <a href="#visite-3d" className={btnSecondary}>
-                {t("viewer3dJumpLink")}
+          </li>
+          <li aria-hidden>
+            <IconChevronRight size={13} className="rtl:rotate-180" />
+          </li>
+          <li aria-current="page" className="text-fg-muted">
+            {model}
+          </li>
+        </ol>
+      </nav>
+
+      <section className={`${container} mt-6 grid gap-8 lg:grid-cols-[minmax(0,1.65fr)_minmax(340px,1fr)] lg:gap-10`}>
+        <VehicleGallery images={images} alt={`${brand} ${model} ${car.year}`} />
+
+        <aside className="lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start">
+          <div className="rounded-[16px] border border-line bg-graphite p-6 sm:p-8">
+            <div className="flex items-center gap-2.5">
+              {logoUrl ? (
+                <Image src={logoUrl} alt="" width={24} height={24} unoptimized className="h-6 w-6 rounded-sm object-contain" />
+              ) : null}
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-fg-muted">{brand}</p>
+            </div>
+            <h1 className="mt-4 text-4xl font-semibold leading-[1.02] tracking-[-0.035em] text-fg sm:text-5xl">{model}</h1>
+            <p className="mt-3 text-sm leading-relaxed text-steel">
+              {version} · {car.year}
+            </p>
+
+            <ul className="mt-6 flex flex-wrap gap-2">
+              {chips.map((c) => (
+                <li key={c} className="rounded-full border border-line px-3 py-1.5 text-xs font-medium text-fg-muted">
+                  {c}
+                </li>
+              ))}
+              <li className="rounded-full border border-line px-3 py-1.5 text-xs font-medium text-fg-muted">
+                {conditionLabel(tu, car.conditionDefault)}
+              </li>
+            </ul>
+
+            {price != null ? (
+              <div className="mt-8 border-t border-line pt-6">
+                <PriceBlock price={price} />
+              </div>
+            ) : null}
+
+            <div className="mt-8 grid gap-3">
+              <Link href={`/compare?a=${car.id}`} className={`${btnPrimary} w-full`}>
+                {tc("compareLink")}
+                <IconArrowRight size={16} className="rtl:rotate-180" />
+              </Link>
+              <div className="grid grid-cols-2 gap-3">
+                <Link href="/catalog" className={`${btnSecondary} w-full`}>
+                  {tu("breadcrumbCatalog")}
+                </Link>
+                {hasViewer3d ? (
+                  <a href="#visite-3d" className={`${btnSecondary} w-full`}>
+                    {tu("view3d")}
+                  </a>
+                ) : officialHref ? (
+                  <a href={officialHref} target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full`}>
+                    {tu("officialSite")}
+                    <IconExternal size={14} />
+                  </a>
+                ) : null}
+              </div>
+            </div>
+
+            <a
+              href="#notes-criteres"
+              className={`mt-6 flex items-center justify-between gap-4 rounded-[12px] border border-line p-4 transition hover:border-line-strong ${focusRing}`}
+            >
+              <span>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-steel">{t("scores")}</span>
+                <span className="mt-1 block text-sm font-medium text-fg">{t("criteriaTitle")}</span>
+              </span>
+              <span className="shrink-0 scale-[0.6] origin-right rtl:origin-left">
+                <ScoreGauge value={overallCriteriaPct} />
+              </span>
+            </a>
+          </div>
+        </aside>
+      </section>
+
+      <div className={`${container} mt-20 space-y-20 sm:mt-28 sm:space-y-28`}>
+        {essentials.length > 0 ? (
+          <section aria-labelledby="essentials-title">
+            <Reveal>
+              <SectionHeading id="essentials-title" eyebrow={tu("essentialsEyebrow")} title={tu("essentialsTitle")} />
+            </Reveal>
+            <Reveal className="mt-10" delay={80}>
+              <SpecsGrid specs={essentials} />
+            </Reveal>
+          </section>
+        ) : null}
+
+        <section className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-16" aria-labelledby="description-title">
+          <Reveal>
+            <p className={eyebrow}>{tu("detailsEyebrow")}</p>
+            <h2 id="description-title" className="text-balance mt-3 text-3xl font-semibold leading-[1.05] tracking-[-0.03em] text-fg sm:text-4xl">
+              {tu("descriptionTitle")}
+            </h2>
+            {officialHref ? (
+              <a
+                href={officialHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`mt-6 inline-flex items-center gap-2 text-sm font-semibold text-accent underline-offset-4 hover:underline ${focusRing}`}
+              >
+                {tu("officialSite")}
+                <IconExternal size={14} />
               </a>
             ) : null}
-          </div>
-        }
-      />
-
-      {(logoUrl || car.officialUrl) && (
-        <div className="flex flex-wrap items-center gap-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          {logoUrl ? (
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl ring-1 ring-zinc-200">
-              <Image src={logoUrl} alt="" width={64} height={64} className="object-contain p-1" unoptimized />
-            </div>
-          ) : null}
-          {car.officialUrl ? (
-            <a
-              href={car.officialUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-semibold text-emerald-700 underline-offset-2 hover:underline"
-            >
-              {t("officialLink")}
-            </a>
-          ) : null}
-        </div>
-      )}
-
-      {images.length > 0 ? (
-        <Card padding="p-4 sm:p-5">
-          <h2 className="text-lg font-bold text-zinc-900">{t("photos")}</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {images.map((src, i) => (
-              <div
-                key={`${src}-${i}`}
-                className={`relative overflow-hidden rounded-2xl bg-zinc-100 ring-1 ring-zinc-200 ${i === 0 ? "sm:col-span-2 sm:row-span-2 min-h-[300px]" : "aspect-video min-h-[160px]"}`}
-              >
-                <Image
-                  src={src}
-                  alt=""
-                  fill
-                  unoptimized
-                  className="object-cover"
-                  sizes={i === 0 ? "(max-width:768px) 100vw, 50vw" : "(max-width:768px) 50vw, 25vw"}
-                />
+          </Reveal>
+          <Reveal delay={80} className="space-y-6">
+            <p className="whitespace-pre-line text-base leading-[1.75] text-fg-muted sm:text-[17px]">{descriptionWithColor}</p>
+            {highlights ? (
+              <div className="rounded-[14px] border border-line bg-graphite p-6">
+                <h3 className="text-sm font-semibold text-fg">{t("highlights")}</h3>
+                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-fg-muted">{highlights}</p>
               </div>
-            ))}
-          </div>
-        </Card>
-      ) : null}
+            ) : null}
+          </Reveal>
+        </section>
 
-      {hasViewer3d ? (
-        <div id="visite-3d" className="scroll-mt-28">
-          <Card padding="p-5 sm:p-6 md:p-8">
-            <Car3DViewer
-              exteriorUrl={viewer3dExterior}
-              interiorUrl={viewer3dInterior}
-              title={t("viewer3dTitle")}
-              tabExterior={t("viewer3dExterior")}
-              tabInterior={t("viewer3dInterior")}
-              missingText={t("viewer3dMissing")}
-            />
-          </Card>
-        </div>
-      ) : null}
-
-      {officialModelPageUrl ? (
-        <Card padding="p-5 sm:p-6">
-          <p className="text-base leading-relaxed text-zinc-700">{t("officialModelGalleryIntro")}</p>
-          <a
-            href={officialModelPageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex flex-wrap items-center gap-2 font-semibold text-emerald-700 underline-offset-2 hover:underline"
-          >
-            {t("officialModelGalleryCta")}
-          </a>
-          <p className="mt-3 text-sm text-zinc-500">{t("officialModelGalleryHint")}</p>
-        </Card>
-      ) : null}
-
-      {pickLocaleText(locale, car.highlightsAr, car.highlightsFr) ? (
-        <Card padding="p-5 sm:p-6">
-          <h2 className="text-lg font-bold text-zinc-900">{t("highlights")}</h2>
-          <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-zinc-800">
-            {pickLocaleText(locale, car.highlightsAr, car.highlightsFr)}
-          </p>
-        </Card>
-      ) : null}
-
-      <Card padding="p-6 sm:p-8 md:p-10">
-        <CarProductStory story={productStory} locale={locale} />
-      </Card>
-
-      {fiche ? <CarEquipmentSheet fiche={fiche} locale={locale} /> : null}
-
-      <Card padding="p-5 sm:p-6 md:p-8">
-        <CarAiChat
-          carId={car.id}
-          locale={locale === "ar" ? "ar" : "fr"}
-          vehicleLabel={title}
-          openAiEnabled={isOpenAiConfigured()}
-        />
-      </Card>
-
-      <div id="notes-criteres" className="scroll-mt-24">
-        <Card padding="p-5 sm:p-6 md:p-8">
-          <CarCriteriaStars title={t("criteriaTitle")} hint={t("criteriaHint")} rows={criteriaRows} />
-        </Card>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-        <div className="space-y-6">
-          <Card>
-            <h2 className="text-xl font-bold text-zinc-900 sm:text-2xl">{t("specs")}</h2>
-            <dl className="mt-4 grid gap-4 text-base sm:grid-cols-2">
-              <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Fuel</dt>
-                <dd className="mt-1 font-semibold text-zinc-900">{car.fuel}</dd>
-              </div>
-              <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Transmission</dt>
-                <dd className="mt-1 font-semibold text-zinc-900">{car.transmission}</dd>
-              </div>
-              {specEngine && (
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100 sm:col-span-2">
-                  <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Motorisation</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">{specEngine}</dd>
+        <section aria-labelledby="specs-title">
+          <Reveal>
+            <SectionHeading id="specs-title" eyebrow={t("specs")} title={tu("specsTitle")} />
+          </Reveal>
+          <Reveal delay={80}>
+            <dl className="mt-10 grid border-t border-line sm:grid-cols-2 sm:gap-x-12">
+              {fullSpecs.map((row) => (
+                <div
+                  key={row.key}
+                  className={`grid gap-1 border-b border-line py-5 sm:grid-cols-[180px_minmax(0,1fr)] sm:gap-6 ${row.wide ? "sm:col-span-2 sm:grid-cols-[180px_minmax(0,1fr)]" : ""}`}
+                >
+                  <dt className="text-[13px] font-medium text-steel">{row.label}</dt>
+                  <dd className="text-[15px] leading-relaxed text-fg">{row.value}</dd>
                 </div>
-              )}
-              {car.specs?.consumptionL100 != null && (
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                  <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Consommation</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">{car.specs.consumptionL100} L/100 km</dd>
-                </div>
-              )}
-              {specDimensions && (
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                  <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Dimensions</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">{specDimensions}</dd>
-                </div>
-              )}
-              {car.specs?.seats != null && (
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                  <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Places</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">{car.specs.seats}</dd>
-                </div>
-              )}
-              {car.specs?.trunkL != null && (
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                  <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Coffre</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">{car.specs.trunkL} L</dd>
-                </div>
-              )}
-              {car.specs?.co2Gkm != null && (
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                  <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">{t("co2")}</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">{car.specs.co2Gkm} g/km</dd>
-                </div>
-              )}
-              {car.specs?.torqueNm != null && (
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                  <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">{t("torque")}</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">{car.specs.torqueNm} N·m</dd>
-                </div>
-              )}
-              {car.specs?.groundClearanceMm != null && (
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                  <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">{t("groundClearance")}</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">{car.specs.groundClearanceMm} mm</dd>
-                </div>
-              )}
-              {car.specs?.maintenanceCostEst != null && (
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100 sm:col-span-2">
-                  <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">{t("maintenance")}</dt>
-                  <dd className="mt-1 font-semibold text-zinc-900">{car.specs.maintenanceCostEst.toLocaleString()} MAD / an</dd>
-                </div>
-              )}
-              {specParts && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">{t("parts")}</dt>
-                  <dd className="mt-2 rounded-xl bg-emerald-50/80 p-4 text-base text-zinc-800 ring-1 ring-emerald-100">
-                    {specParts}
-                  </dd>
-                </div>
-              )}
-              {(specSafety || specComfort) && (
-                <div className="sm:col-span-2 space-y-3 rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
-                  {specSafety ? (
-                    <div>
-                      <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Sécurité</dt>
-                      <dd className="mt-1 text-base text-zinc-800">{specSafety}</dd>
-                    </div>
-                  ) : null}
-                  {specComfort ? (
-                    <div>
-                      <dt className="text-sm font-medium uppercase tracking-wide text-zinc-500">Confort</dt>
-                      <dd className="mt-1 text-base text-zinc-800">{specComfort}</dd>
-                    </div>
-                  ) : null}
-                </div>
-              )}
+              ))}
             </dl>
-          </Card>
+          </Reveal>
+        </section>
 
-          <Card>
-            <h2 className="text-lg font-bold text-zinc-900">{t("popularIssuesTitle")}</h2>
-            <p className="mt-2 text-xs text-zinc-500">{t("popularIssuesHint")}</p>
-            <ul className="mt-4 space-y-2">
+        {hasViewer3d ? (
+          <div id="visite-3d" className="scroll-mt-28">
+            <Card padding="p-5 sm:p-6 md:p-8">
+              <Car3DViewer
+                exteriorUrl={viewer3dExterior}
+                interiorUrl={viewer3dInterior}
+                title={t("viewer3dTitle")}
+                tabExterior={t("viewer3dExterior")}
+                tabInterior={t("viewer3dInterior")}
+                missingText={t("viewer3dMissing")}
+              />
+            </Card>
+          </div>
+        ) : null}
+
+        <Card padding="p-6 sm:p-8 md:p-10">
+          <CarProductStory story={productStory} locale={locale} />
+        </Card>
+
+        {fiche ? <CarEquipmentSheet fiche={fiche} locale={locale} /> : null}
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div id="notes-criteres" className="scroll-mt-28">
+            <Card padding="p-5 sm:p-6 md:p-8" className="h-full">
+              <CarCriteriaStars title={t("criteriaTitle")} hint={t("criteriaHint")} rows={criteriaRows} />
+            </Card>
+          </div>
+          <Card padding="p-5 sm:p-6 md:p-8" className="h-full">
+            <h2 className="text-lg font-semibold text-fg">{t("popularIssuesTitle")}</h2>
+            <p className="mt-2 text-xs text-steel">{t("popularIssuesHint")}</p>
+            <ul className="mt-5 space-y-2">
               {popularIssues.map((issue, i) => (
-                <li key={`${issue}-${i}`} className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2 text-sm text-zinc-900">
+                <li key={`${issue}-${i}`} className="rounded-[10px] border border-line bg-white/[0.02] px-4 py-3 text-sm text-fg-muted">
                   {issue}
                 </li>
               ))}
             </ul>
           </Card>
-
-          <Card>
-            <h2 className="text-lg font-bold text-zinc-900">{t("reviews")}</h2>
-            {siblingCarIds.length > 1 ? (
-              <p className="mt-2 text-xs text-zinc-500">{t("reviewsSameModelYearHint")}</p>
-            ) : null}
-            {reviewScope === "model-any-year" ? (
-              <p className="mt-2 text-xs text-amber-700">{t("reviewsOtherYearsHint")}</p>
-            ) : null}
-            {car.reviews.length === 0 ? (
-              <div className="mt-4 space-y-3 rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/80 p-4 text-sm leading-relaxed text-zinc-700">
-                <p>{t("reviewsEmpty")}</p>
-                <p className="text-zinc-600">{t("reviewsEmptyCta")}</p>
-              </div>
-            ) : (
-              <ul className="mt-4 space-y-4">
-                {car.reviews.map((r) => {
-                  const tone = reviewToneKind(r.globalNote);
-                  const toneClass =
-                    tone === "positive"
-                      ? "border-emerald-200 bg-emerald-50/70"
-                      : tone === "critical"
-                        ? "border-rose-200 bg-rose-50/80"
-                        : "border-amber-200 bg-amber-50/70";
-                  const toneLabel =
-                    tone === "positive" ? t("reviewTonePositive") : tone === "critical" ? t("reviewToneCritical") : t("reviewToneMixed");
-                  const originLabel = reviewOriginLabel(r.reviewOrigin, t);
-                  return (
-                    <li key={r.id} className={`rounded-2xl border p-4 ${toneClass}`}>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge tone={tone === "positive" ? "success" : tone === "critical" ? "warning" : "neutral"}>
-                          {toneLabel}
-                        </Badge>
-                        {originLabel ? (
-                          <Badge tone="neutral">{originLabel}</Badge>
-                        ) : null}
-                        {r.globalNote != null && (
-                          <span className="text-xs font-semibold text-zinc-700">
-                            {t("globalNote")} : {r.globalNote}/5
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-2 text-xs font-semibold text-zinc-800">
-                        {reviewDisplayLabel(r, locale)}
-                      </p>
-                      {(r.sourceName || r.sourceUrl) && (
-                        <p className="mt-1 text-xs text-zinc-500">
-                          {t("reviewSource")}{" "}
-                          {r.sourceName}
-                          {r.sourceUrl ? (
-                            <>
-                              {" "}
-                              <a
-                                href={r.sourceUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-medium text-emerald-700 underline-offset-2 hover:underline"
-                              >
-                                {t("reviewSourceLink")}
-                              </a>
-                            </>
-                          ) : null}
-                        </p>
-                      )}
-                      <p className="mt-2 text-sm leading-relaxed text-zinc-900">
-                        {reviewComment(r, locale)}
-                      </p>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </Card>
         </div>
 
-        <aside className="space-y-4">
-          <Card className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">{t("scores")}</p>
-            <div className="mt-4 flex justify-center">
-              <ScoreGauge value={overallCriteriaPct} />
+        <Card padding="p-5 sm:p-6 md:p-8">
+          <CarAiChat
+            carId={car.id}
+            locale={loc}
+            vehicleLabel={title}
+            openAiEnabled={isOpenAiConfigured()}
+          />
+        </Card>
+
+        <section aria-labelledby="reviews-title">
+          <h2 id="reviews-title" className="text-3xl font-semibold tracking-[-0.03em] text-fg">
+            {t("reviews")}
+          </h2>
+          {siblingCarIds.length > 1 ? <p className="mt-2 text-xs text-steel">{t("reviewsSameModelYearHint")}</p> : null}
+          {reviewScope === "model-any-year" ? <p className="mt-2 text-xs text-accent">{t("reviewsOtherYearsHint")}</p> : null}
+          {car.reviews.length === 0 ? (
+            <div className="mt-6 space-y-3 rounded-[14px] border border-dashed border-line-strong bg-graphite p-6 text-sm leading-relaxed text-fg-muted">
+              <p>{t("reviewsEmpty")}</p>
+              <p className="text-steel">{t("reviewsEmptyCta")}</p>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-zinc-500">
-              <a href="#notes-criteres" className="font-semibold text-emerald-700 underline-offset-2 hover:underline">
-                {t("criteriaTitle")}
-              </a>
-            </p>
-            <div className="mt-4 rounded-lg bg-zinc-50 p-3 text-left text-xs ring-1 ring-zinc-100">
-              <p className="text-zinc-500">{t("priceNewEstAside")}</p>
-              <p className="mt-1 font-bold tabular-nums text-zinc-900">{car.priceNewEst.toLocaleString()} MAD</p>
-            </div>
-          </Card>
-          <div className="flex flex-wrap gap-2">
-            <Badge tone="success">{car.conditionDefault}</Badge>
-            <Badge tone="neutral">{car.bodyType}</Badge>
-          </div>
-        </aside>
+          ) : (
+            <ul className="mt-6 grid gap-4 md:grid-cols-2">
+              {car.reviews.map((r) => {
+                const tone = reviewToneKind(r.globalNote);
+                const toneLabel =
+                  tone === "positive" ? t("reviewTonePositive") : tone === "critical" ? t("reviewToneCritical") : t("reviewToneMixed");
+                const originLabel = reviewOriginLabel(r.reviewOrigin, t);
+                return (
+                  <li key={r.id} className="rounded-[14px] border border-line bg-graphite p-5 sm:p-6">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge tone={tone === "positive" ? "success" : tone === "critical" ? "warning" : "neutral"}>{toneLabel}</Badge>
+                      {originLabel ? <Badge tone="neutral">{originLabel}</Badge> : null}
+                      {r.globalNote != null && (
+                        <span className="text-xs font-semibold tabular-nums text-fg-muted">
+                          {t("globalNote")} : {r.globalNote}/5
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-4 text-[15px] leading-relaxed text-fg">{reviewComment(r, locale)}</p>
+                    <p className="mt-4 text-xs font-semibold text-fg-muted">{reviewDisplayLabel(r, locale)}</p>
+                    {(r.sourceName || r.sourceUrl) && (
+                      <p className="mt-1 text-xs text-steel">
+                        {t("reviewSource")} {r.sourceName}
+                        {r.sourceUrl ? (
+                          <>
+                            {" "}
+                            <a
+                              href={r.sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-medium text-accent underline-offset-2 hover:underline"
+                            >
+                              {t("reviewSourceLink")}
+                            </a>
+                          </>
+                        ) : null}
+                      </p>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        {similar.length > 0 ? (
+          <section aria-labelledby="similar-title">
+            <Reveal>
+              <SectionHeading id="similar-title" eyebrow={tu("similarEyebrow")} title={tu("similarTitle")} />
+              <p className="mt-3 text-sm text-steel">{tu("similarHint")}</p>
+            </Reveal>
+            <ul className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+              {similar.map((v, i) => (
+                <Reveal as="li" key={v.id} delay={i * 70}>
+                  <VehicleCard car={v} />
+                </Reveal>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </div>
+
+      <StickyCTA
+        title={`${brand} ${model}`}
+        info={
+          price != null ? (
+            <p className="text-base font-semibold tabular-nums text-fg">{formatPriceDh(price, locale)}</p>
+          ) : (
+            <p className="text-sm font-medium text-fg">{car.year}</p>
+          )
+        }
+        action={
+          <Link href={`/compare?a=${car.id}`} className={`${btnPrimary} px-5`}>
+            {tc("compareLink")}
+          </Link>
+        }
+      />
     </article>
   );
 }
