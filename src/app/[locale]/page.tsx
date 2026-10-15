@@ -89,7 +89,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <FeaturedVehicle car={main} />
             </Reveal>
             {secondary.length > 0 ? (
-              <ul className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+              <ul className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
                 {secondary.map((car, i) => (
                   <Reveal as="li" key={car.id} delay={i * 70}>
                     <VehicleCard car={car} />
@@ -126,7 +126,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <Reveal>
               <SectionHeading id="latest-title" eyebrow={t("latestEyebrow")} title={t("latestTitle")} />
             </Reveal>
-            <ul className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+            <ul className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
               {latest.map((car, i) => (
                 <Reveal as="li" key={car.id} delay={(i % 3) * 70}>
                   <VehicleCard car={car} />

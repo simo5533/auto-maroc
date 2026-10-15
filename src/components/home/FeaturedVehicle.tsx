@@ -22,7 +22,7 @@ export function FeaturedVehicle({ car }: { car: VehicleCardData }) {
   ];
 
   return (
-    <article className="group grid overflow-hidden rounded-[14px] border border-line bg-graphite lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
+    <article className="group grid grid-cols-1 overflow-hidden rounded-[14px] border border-line bg-graphite lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
       <Link href={`/cars/${car.id}`} className="showroom-stage relative block aspect-[16/10] overflow-hidden lg:aspect-auto lg:min-h-[520px]" tabIndex={-1} aria-hidden>
         <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.035] motion-scale">
           <VehicleImage src={car.coverUrl} alt="" sizes="(max-width: 1023px) 100vw, 65vw" placeholderLabel={t("noImage")} />

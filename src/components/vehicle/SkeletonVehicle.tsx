@@ -26,7 +26,7 @@ export function SkeletonVehicle() {
 
 export function SkeletonVehicleGrid({ count = 6 }: { count?: number }) {
   return (
-    <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+    <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
       {Array.from({ length: count }, (_, i) => (
         <li key={i}>
           <SkeletonVehicle />

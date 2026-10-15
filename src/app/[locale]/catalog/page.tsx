@@ -165,7 +165,7 @@ export default async function CatalogPage({
           />
         ) : (
           <>
-            <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+            <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
               {firstRow.map((car, i) => (
                 <li key={car.id}>
                   <VehicleCard car={car} priority={i < 3} />
@@ -192,7 +192,7 @@ export default async function CatalogPage({
             ) : null}
 
             {restRows.length > 0 ? (
-              <ul className={`grid gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6 ${breakVehicle ? "" : "mt-5 xl:mt-6"}`}>
+              <ul className={`grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6 ${breakVehicle ? "" : "mt-5 xl:mt-6"}`}>
                 {restRows.map((car) => (
                   <li key={car.id}>
                     <VehicleCard car={car} />

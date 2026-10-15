@@ -294,8 +294,10 @@ export default async function CarDetailPage({
         </ol>
       </nav>
 
-      <section className={`${container} mt-6 grid gap-8 lg:grid-cols-[minmax(0,1.65fr)_minmax(340px,1fr)] lg:gap-10`}>
-        <VehicleGallery images={images} alt={`${brand} ${model} ${car.year}`} />
+      <section className={`${container} mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.65fr)_minmax(340px,1fr)] lg:gap-10`}>
+        <div className="min-w-0">
+          <VehicleGallery images={images} alt={`${brand} ${model} ${car.year}`} />
+        </div>
 
         <aside className="lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start">
           <div className="rounded-[16px] border border-line bg-graphite p-6 sm:p-8">
@@ -375,7 +377,7 @@ export default async function CarDetailPage({
           </section>
         ) : null}
 
-        <section className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-16" aria-labelledby="description-title">
+        <section className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-16" aria-labelledby="description-title">
           <Reveal>
             <p className={eyebrow}>{tu("detailsEyebrow")}</p>
             <h2 id="description-title" className="text-balance mt-3 text-3xl font-semibold leading-[1.05] tracking-[-0.03em] text-fg sm:text-4xl">
@@ -444,7 +446,7 @@ export default async function CarDetailPage({
 
         {fiche ? <CarEquipmentSheet fiche={fiche} locale={locale} /> : null}
 
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <div id="notes-criteres" className="scroll-mt-28">
             <Card padding="p-5 sm:p-6 md:p-8" className="h-full">
               <CarCriteriaStars title={t("criteriaTitle")} hint={t("criteriaHint")} rows={criteriaRows} />
@@ -534,7 +536,7 @@ export default async function CarDetailPage({
               <SectionHeading id="similar-title" eyebrow={tu("similarEyebrow")} title={tu("similarTitle")} />
               <p className="mt-3 text-sm text-steel">{tu("similarHint")}</p>
             </Reveal>
-            <ul className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+            <ul className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
               {similar.map((v, i) => (
                 <Reveal as="li" key={v.id} delay={i * 70}>
                   <VehicleCard car={v} />
