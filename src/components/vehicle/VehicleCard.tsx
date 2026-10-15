@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { BrandLogo } from "@/components/vehicle/BrandLogo";
 import { VehicleImage } from "@/components/vehicle/VehicleImage";
 import { IconArrowRight, IconCalendar, IconFuel, IconGearbox, IconImage } from "@/components/ui/icons";
 import { focusRing } from "@/components/ui/styles";
@@ -35,9 +35,7 @@ export function VehicleCard({ car, priority = false }: { car: VehicleCardData; p
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="flex items-center gap-2">
-          {car.logoUrl ? (
-            <Image src={car.logoUrl} alt="" width={16} height={16} unoptimized className="h-4 w-4 rounded-sm object-contain opacity-80" />
-          ) : null}
+          <BrandLogo src={car.logoUrl} size={16} className="opacity-80" />
           <p className="truncate text-[11px] font-semibold uppercase tracking-[0.2em] text-fg-muted">{car.brand}</p>
         </div>
         <h3 className="mt-2 text-xl font-semibold leading-tight tracking-[-0.015em] text-fg">

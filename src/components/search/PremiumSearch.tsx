@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { BrandLogo } from "@/components/vehicle/BrandLogo";
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { IconArrowRight, IconSearch } from "@/components/ui/icons";
@@ -158,9 +158,7 @@ export function PremiumSearch({
                       onClick={() => setOpen(false)}
                       className={`inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-white/[0.03] px-3 text-[13px] font-medium text-fg transition hover:border-line-strong hover:bg-white/[0.06] ${focusRing}`}
                     >
-                      {b.logoUrl ? (
-                        <Image src={b.logoUrl} alt="" width={16} height={16} unoptimized className="h-4 w-4 rounded-sm object-contain" />
-                      ) : null}
+                      <BrandLogo src={b.logoUrl} size={16} />
                       {b.label}
                     </Link>
                   </li>

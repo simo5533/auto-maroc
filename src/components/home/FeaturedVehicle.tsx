@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { BrandLogo } from "@/components/vehicle/BrandLogo";
 import { VehicleImage } from "@/components/vehicle/VehicleImage";
 import { IconArrowRight, IconCalendar, IconFuel, IconGauge, IconGearbox } from "@/components/ui/icons";
 import { btnPrimary } from "@/components/ui/styles";
@@ -31,9 +31,7 @@ export function FeaturedVehicle({ car }: { car: VehicleCardData }) {
       <div className="flex flex-col justify-between gap-10 p-6 sm:p-10">
         <div>
           <div className="flex items-center gap-2.5">
-            {car.logoUrl ? (
-              <Image src={car.logoUrl} alt="" width={22} height={22} unoptimized className="h-[22px] w-[22px] rounded-sm object-contain" />
-            ) : null}
+            <BrandLogo src={car.logoUrl} size={22} />
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-fg-muted">{car.brand}</p>
           </div>
           <h3 className="mt-4 text-4xl font-semibold leading-none tracking-[-0.035em] text-fg sm:text-5xl">{car.model}</h3>

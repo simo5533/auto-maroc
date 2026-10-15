@@ -22,6 +22,7 @@ export function FilterSelect({
     <label className={`relative block ${className}`}>
       <span className="sr-only">{label}</span>
       <select
+        autoComplete="off"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={`h-11 w-full cursor-pointer appearance-none rounded-[10px] border bg-carbon/80 ps-3.5 pe-9 text-[13px] font-medium transition hover:border-line-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${

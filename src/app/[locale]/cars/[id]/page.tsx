@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ReviewOrigin } from "@prisma/client";
 import { derivePopularIssues } from "@/lib/car-pros-cons";
-import Image from "next/image";
 import { isDatabaseConfigured } from "@/lib/db-ready";
 import { prisma } from "@/lib/prisma";
 import { DatabaseRequiredMessage } from "@/components/DatabaseRequiredMessage";
@@ -29,6 +28,7 @@ import { Car3DViewer } from "@/components/Car3DViewer";
 import { buildCarCriteriaRatings, type CarCriterionId } from "@/lib/car-criteria-ratings";
 import { CarCriteriaStars } from "@/components/CarCriteriaStars";
 import { Reveal } from "@/components/motion/Reveal";
+import { BrandLogo } from "@/components/vehicle/BrandLogo";
 import { PriceBlock } from "@/components/vehicle/PriceBlock";
 import { SpecsGrid, type EssentialSpec } from "@/components/vehicle/SpecsGrid";
 import { StickyCTA } from "@/components/vehicle/StickyCTA";
@@ -300,9 +300,7 @@ export default async function CarDetailPage({
         <aside className="lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start">
           <div className="rounded-[16px] border border-line bg-graphite p-6 sm:p-8">
             <div className="flex items-center gap-2.5">
-              {logoUrl ? (
-                <Image src={logoUrl} alt="" width={24} height={24} unoptimized className="h-6 w-6 rounded-sm object-contain" />
-              ) : null}
+              <BrandLogo src={logoUrl} size={24} />
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-fg-muted">{brand}</p>
             </div>
             <h1 className="mt-4 text-4xl font-semibold leading-[1.02] tracking-[-0.035em] text-fg sm:text-5xl">{model}</h1>
